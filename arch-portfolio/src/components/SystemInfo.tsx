@@ -30,7 +30,7 @@ const SystemInfo: React.FC = () => {
         }
 
         // Get the battery manager
-        const batteryManager = await (navigator as any).getBattery();
+        const batteryManager = await navigator.getBattery();
         
         // Check if we got a Response object (which means something is wrong)
         if (batteryManager instanceof Response) {
