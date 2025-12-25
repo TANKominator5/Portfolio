@@ -1,12 +1,12 @@
 // src/app/page.tsx
-'use client'; // This is important for using state and event handlers
+'use client';
 
 import React, { useState } from 'react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
+import DateDisplay from '@/components/DateDisplay'; // <-- Check this import
 import Window from '@/components/Window';
 
-// Define an interface for our window state
 interface OpenWindowsState {
   aboutMe: boolean;
   resume: boolean;
@@ -15,7 +15,6 @@ interface OpenWindowsState {
 }
 
 const Home: React.FC = () => {
-  // State to track which windows are open
   const [openWindows, setOpenWindows] = useState<OpenWindowsState>({
     aboutMe: false,
     resume: false,
@@ -23,21 +22,21 @@ const Home: React.FC = () => {
     contact: false,
   });
 
-  // Function to open a window
   const handleOpen = (windowName: keyof OpenWindowsState) => {
     setOpenWindows((prev) => ({ ...prev, [windowName]: true }));
   };
 
-  // Function to close a window
   const handleClose = (windowName: keyof OpenWindowsState) => {
     setOpenWindows((prev) => ({ ...prev, [windowName]: false }));
   };
 
   return (
-    <main className="h-screen bg-desktop-wallpaper bg-cover bg-center text-white overflow-hidden">
+    // IMPORTANT: 'relative' must be here for absolute positioning to work
+    <main className="h-screen bg-desktop-wallpaper bg-cover bg-center text-white overflow-hidden relative">
       <SystemInfo />
+      {/* Date Display Component */}
+      <DateDisplay />
 
-      {/* Desktop Icons */}
       <div className="flex flex-col items-start p-8 space-y-4">
         <div onDoubleClick={() => handleOpen('aboutMe')}>
           <DesktopIcon icon="👤" name="About Me" />
@@ -53,7 +52,6 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Render Windows if they are open */}
       {openWindows.aboutMe && (
         <Window title="About Me" onClose={() => handleClose('aboutMe')}>
           <p>This is the About Me window.</p>
