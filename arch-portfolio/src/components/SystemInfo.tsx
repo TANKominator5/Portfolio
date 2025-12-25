@@ -116,7 +116,7 @@ const SystemInfo: React.FC = () => {
   };
 
   return (
-    <div className="absolute top-4 right-4 flex items-center gap-3 bg-gray-800 bg-opacity-60 backdrop-blur-md p-2 rounded-lg text-white shadow-lg text-sm font-sans">
+    <div className="absolute top-4 right-4 flex items-center gap-3 backdrop-blur-md p-2 rounded-lg text-white shadow-lg text-sm font-sans">
       <span>{formattedTime}</span>
       {renderBatteryInfo()}
     </div>

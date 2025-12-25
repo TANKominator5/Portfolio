@@ -28,10 +28,10 @@ const DateDisplay: React.FC = () => {
 
   return (
     <div 
-      className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center px-4 py-2 rounded-lg bg-gray-800/60 backdrop-blur-md text-white shadow-lg border border-white/10 select-none"
-      style={{ minWidth: '150px' }} // Ensure it has width
+      className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-3 backdrop-blur-md p-2 rounded-lg text-white shadow-lg text-sm font-sans select-none border border-white/10"
+      style={{ minWidth: '150px' }}
     >
-      <span className="text-sm font-medium">{formattedDate}</span>
+      <span>{formattedDate}</span>
     </div>
   );
 };
