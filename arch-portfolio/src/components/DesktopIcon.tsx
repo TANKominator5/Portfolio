@@ -1,16 +1,38 @@
 // components/DesktopIcon.tsx
 import React from 'react';
+import { LucideIcon } from 'lucide-react';
 
 interface DesktopIconProps {
-  icon: string;
+  icon: LucideIcon;
   name: string;
+  color?: string;
+  filled?: boolean;
 }
 
-const DesktopIcon: React.FC<DesktopIconProps> = ({ icon, name }) => {
+const DesktopIcon: React.FC<DesktopIconProps> = ({ icon: Icon, name, color = "#ffffff", filled = true }) => {
   return (
-    <div className="flex flex-col items-center justify-center text-white w-24 h-24">
-      <span className="text-4xl">{icon}</span>
-      <span className="mt-2 text-sm">{name}</span>
+    <div className="flex flex-col items-center justify-center w-24 h-24 hover:bg-white/10 rounded-lg transition-colors cursor-pointer group">
+      <div 
+        className="transition-transform group-hover:scale-110 duration-200 relative"
+        style={{ filter: `drop-shadow(0 0 8px ${color}60)` }}
+      >
+        {/* Filled background layer */}
+        <Icon 
+          size={52} 
+          strokeWidth={0} 
+          fill={color}
+          className="drop-shadow-sm" 
+        />
+        {/* Stroke layer on top */}
+        <Icon 
+          size={52} 
+          strokeWidth={1.5} 
+          color="#ffffff"
+          fill="none"
+          className="absolute top-0 left-0" 
+        />
+      </div>
+      <span className="mt-2 text-sm font-medium text-center tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{name}</span>
     </div>
   );
 };

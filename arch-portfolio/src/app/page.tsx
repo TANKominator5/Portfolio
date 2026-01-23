@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { User, FileText, Folder, Mail } from 'lucide-react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
 import DateDisplay from '@/components/DateDisplay'; // <-- Check this import
@@ -39,16 +40,16 @@ const Home: React.FC = () => {
 
       <div className="flex flex-col items-start p-8 space-y-4">
         <div onDoubleClick={() => handleOpen('aboutMe')}>
-          <DesktopIcon icon="👤" name="About Me" />
+          <DesktopIcon icon={User} name="About Me" color="#60A5FA" />
         </div>
         <div onDoubleClick={() => handleOpen('resume')}>
-          <DesktopIcon icon="📄" name="My Resume" />
+          <DesktopIcon icon={FileText} name="My Resume" color="#A78BFA" />
         </div>
         <div onDoubleClick={() => handleOpen('projects')}>
-          <DesktopIcon icon="📁" name="My Projects" />
+          <DesktopIcon icon={Folder} name="My Projects" color="#FBBF24" />
         </div>
         <div onDoubleClick={() => handleOpen('contact')}>
-          <DesktopIcon icon="📧" name="Contact Me" />
+          <DesktopIcon icon={Mail} name="Contact Me" color="#F87171" />
         </div>
       </div>
 
