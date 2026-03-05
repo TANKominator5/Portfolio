@@ -8,6 +8,7 @@ import SystemInfo from '@/components/SystemInfo';
 import DateDisplay from '@/components/DateDisplay';
 import Window from '@/components/Window';
 import Taskbar, { TaskbarApp } from '@/components/Taskbar';
+import ResumeContent from '@/components/ResumeContent';
 
 interface OpenWindowsState {
   aboutMe: boolean;
@@ -135,10 +136,10 @@ const Home: React.FC = () => {
           onMinimize={() => handleMinimize('resume')}
           onFocus={() => bringToFront('resume')}
           zIndex={windowZ.resume}
-          defaultWidth={700}
-          defaultHeight={500}
+          defaultWidth={800}
+          defaultHeight={600}
         >
-          <p>This is where the resume information will go.</p>
+          <div className="-m-4 h-[calc(100%+2rem)]"><ResumeContent /></div>
         </Window>
       )}
 
