@@ -23,65 +23,35 @@ const SystemInfo: React.FC = () => {
 
     const getBatteryStatus = async () => {
       try {
-        // Check if getBattery exists in navigator
         if (!('getBattery' in navigator)) {
-          console.log('Battery API not supported in this browser');
           setBattery({ level: null, status: 'unavailable' });
           return;
         }
 
-        // Get the battery manager
-        const batteryManager = await navigator.getBattery();
-        
-        // Check if we got a Response object (which means something is wrong)
-        if (batteryManager instanceof Response) {
-          console.error('getBattery() returned a Response object instead of BatteryManager');
-          console.log('This might be caused by a browser extension or service worker');
+        const result = await (navigator as any).getBattery();
+
+        // Validate that we got a real BatteryManager (has a numeric `level` property)
+        // Some environments return a Response or other unexpected object
+        if (
+          !result ||
+          typeof result !== 'object' ||
+          typeof result.level !== 'number' ||
+          result instanceof Response
+        ) {
           setBattery({ level: null, status: 'unavailable' });
           return;
         }
 
-        // Check if batteryManager has the expected properties
-        if (!batteryManager || typeof batteryManager !== 'object') {
-          console.error('Invalid battery manager object');
-          setBattery({ level: null, status: 'unavailable' });
-          return;
-        }
+        const percentage = Math.round(result.level * 100);
+        setBattery({ level: percentage, status: 'available' });
 
-        console.log('Battery Manager received:', batteryManager);
-        console.log('All properties:', Object.getOwnPropertyNames(batteryManager));
-        console.log('Prototype properties:', Object.getOwnPropertyNames(Object.getPrototypeOf(batteryManager)));
-        
-        // Try to access the level property
-        const level = batteryManager.level;
-        console.log('Battery level:', level, 'Type:', typeof level);
-
-        // Validate and set battery level
-        if (typeof level === 'number' && !isNaN(level) && level >= 0 && level <= 1) {
-          const percentage = Math.round(level * 100);
-          console.log('✅ Successfully set battery to:', percentage + '%');
-          setBattery({
-            level: percentage,
-            status: 'available',
-          });
-          
-          // Add event listeners for battery changes
-          batteryManager.addEventListener('levelchange', () => {
-            const newLevel = batteryManager.level;
-            if (typeof newLevel === 'number' && !isNaN(newLevel)) {
-              setBattery({
-                level: Math.round(newLevel * 100),
-                status: 'available',
-              });
-            }
-          });
-        } else {
-          console.error('❌ Battery level is invalid:', level);
-          setBattery({ level: null, status: 'unavailable' });
-        }
-
-      } catch (error) {
-        console.error('❌ Error getting battery status:', error);
+        const handleLevelChange = () => {
+          if (typeof result.level === 'number') {
+            setBattery({ level: Math.round(result.level * 100), status: 'available' });
+          }
+        };
+        result.addEventListener('levelchange', handleLevelChange);
+      } catch {
         setBattery({ level: null, status: 'unavailable' });
       }
     };
