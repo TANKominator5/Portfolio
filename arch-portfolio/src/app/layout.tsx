@@ -1,14 +1,20 @@
 // src/app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  userScalable: false,
+  themeColor: "#1a1a2e",
+};
+
 export const metadata: Metadata = {
   title: "Arch Portfolio",
   description: "My riced Arch Linux themed portfolio",
-  viewport: "width=device-width, initial-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({

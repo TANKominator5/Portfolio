@@ -55,21 +55,26 @@ const Home: React.FC = () => {
   return (
     // IMPORTANT: 'relative' must be here for absolute positioning to work
     <main className="h-screen bg-desktop-wallpaper bg-cover bg-center text-white overflow-hidden relative">
-      <SystemInfo />
-      {/* Date Display Component */}
-      <DateDisplay />
+      {/* Top bar: date left/center, system info right -- flex row prevents overlap */}
+      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-2 py-2 sm:px-4 sm:py-3">
+        <div className="flex-1" />
+        <DateDisplay />
+        <div className="flex-1 flex justify-end">
+          <SystemInfo />
+        </div>
+      </div>
 
-      <div className="grid grid-cols-4 sm:grid-cols-1 gap-1 sm:gap-4 p-4 pt-12 sm:p-8 sm:pt-8 sm:flex sm:flex-col sm:items-start">
-        <div onDoubleClick={() => handleOpen('aboutMe')} onTouchEnd={() => handleOpen('aboutMe')}>
+      <div className="grid grid-cols-2 gap-2 p-4 pt-14 sm:grid-cols-1 sm:gap-4 sm:p-8 sm:pt-16 sm:flex sm:flex-col sm:items-start">
+        <div onDoubleClick={() => handleOpen('aboutMe')} onTouchEnd={(e) => { e.preventDefault(); handleOpen('aboutMe'); }}>
           <DesktopIcon icon={User} name="About Me" color="#60A5FA" />
         </div>
-        <div onDoubleClick={() => handleOpen('resume')} onTouchEnd={() => handleOpen('resume')}>
+        <div onDoubleClick={() => handleOpen('resume')} onTouchEnd={(e) => { e.preventDefault(); handleOpen('resume'); }}>
           <DesktopIcon icon={FileText} name="My Resume" color="#A78BFA" />
         </div>
-        <div onDoubleClick={() => handleOpen('projects')} onTouchEnd={() => handleOpen('projects')}>
+        <div onDoubleClick={() => handleOpen('projects')} onTouchEnd={(e) => { e.preventDefault(); handleOpen('projects'); }}>
           <DesktopIcon icon={Folder} name="My Projects" color="#FBBF24" />
         </div>
-        <div onDoubleClick={() => handleOpen('contact')} onTouchEnd={() => handleOpen('contact')}>
+        <div onDoubleClick={() => handleOpen('contact')} onTouchEnd={(e) => { e.preventDefault(); handleOpen('contact'); }}>
           <DesktopIcon icon={Mail} name="Contact Me" color="#F87171" />
         </div>
       </div>

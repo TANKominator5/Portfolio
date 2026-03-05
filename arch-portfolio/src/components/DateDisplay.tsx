@@ -31,10 +31,10 @@ const DateDisplay: React.FC = () => {
 
   return (
     <div 
-      className="absolute top-2 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-3 backdrop-blur-md px-3 py-1.5 sm:p-2 rounded-lg text-white shadow-lg text-xs sm:text-sm font-sans select-none border border-white/10"
+      className="flex items-center justify-center backdrop-blur-md px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-lg text-white shadow-lg text-[11px] sm:text-sm font-sans select-none border border-white/10 shrink-0"
     >
-      <span className="whitespace-pre hidden sm:inline">{formattedDateFull}</span>
-      <span className="whitespace-pre sm:hidden">{formattedDateShort}</span>
+      <span className="whitespace-nowrap hidden sm:inline">{formattedDateFull}</span>
+      <span className="whitespace-nowrap sm:hidden">{formattedDateShort}</span>
     </div>
   );
 };
