@@ -2,11 +2,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, FileText, Folder, Mail } from 'lucide-react';
+import { User, FileText, Folder, Mail, LucideIcon } from 'lucide-react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
-import DateDisplay from '@/components/DateDisplay'; // <-- Check this import
+import DateDisplay from '@/components/DateDisplay';
 import Window from '@/components/Window';
+import Taskbar, { TaskbarApp } from '@/components/Taskbar';
 
 interface OpenWindowsState {
   aboutMe: boolean;
@@ -14,6 +15,13 @@ interface OpenWindowsState {
   projects: boolean;
   contact: boolean;
 }
+
+const APP_META: Record<keyof OpenWindowsState, { name: string; icon: LucideIcon; color: string }> = {
+  aboutMe:  { name: 'About Me',     icon: User,     color: '#60A5FA' },
+  resume:   { name: 'My Resume',    icon: FileText, color: '#A78BFA' },
+  projects: { name: 'My Projects',  icon: Folder,   color: '#FBBF24' },
+  contact:  { name: 'Contact Me',   icon: Mail,     color: '#F87171' },
+};
 
 const Home: React.FC = () => {
   const [openWindows, setOpenWindows] = useState<OpenWindowsState>({
@@ -29,6 +37,19 @@ const Home: React.FC = () => {
 
   const handleClose = (windowName: keyof OpenWindowsState) => {
     setOpenWindows((prev) => ({ ...prev, [windowName]: false }));
+  };
+
+  // Build list of currently open apps for the taskbar
+  const activeApps: TaskbarApp[] = (Object.keys(openWindows) as Array<keyof OpenWindowsState>)
+    .filter((key) => openWindows[key])
+    .map((key) => ({
+      key,
+      ...APP_META[key],
+    }));
+
+  const handleTaskbarClick = (key: string) => {
+    // Toggle window: clicking an app in the taskbar closes it
+    handleClose(key as keyof OpenWindowsState);
   };
 
   return (
@@ -76,6 +97,9 @@ const Home: React.FC = () => {
           <p>You can contact me here.</p>
         </Window>
       )}
+
+      {/* Taskbar: active app icons, bottom-right */}
+      <Taskbar apps={activeApps} onAppClick={handleTaskbarClick} />
     </main>
   );
 };
