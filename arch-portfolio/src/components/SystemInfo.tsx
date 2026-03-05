@@ -10,7 +10,7 @@ type BatteryStateInfo = {
 };
 
 const SystemInfo: React.FC = () => {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
   // Initialize the battery state as 'loading'
   const [battery, setBattery] = useState<BatteryStateInfo>({
     level: null,
@@ -18,6 +18,7 @@ const SystemInfo: React.FC = () => {
   });
 
   useEffect(() => {
+    setTime(new Date());
     const timer = setInterval(() => setTime(new Date()), 1000);
 
     const getBatteryStatus = async () => {
@@ -92,10 +93,15 @@ const SystemInfo: React.FC = () => {
     };
   }, []);
 
-  const formattedTime = time.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const formattedTime = time
+    ? time.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
+
+  // Return null on server-side or before first client render
+  if (!time) return null;
 
   // This helper function decides what to display based on the battery status
   const renderBatteryInfo = () => {
