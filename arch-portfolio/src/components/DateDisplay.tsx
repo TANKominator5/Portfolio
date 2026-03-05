@@ -21,18 +21,20 @@ const DateDisplay: React.FC = () => {
   if (!currentDate) return null;
 
   const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayNameShort = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
   const day = currentDate.getDate();
   const monthShort = currentDate.toLocaleDateString('en-US', { month: 'short' });
   const year = currentDate.getFullYear();
 
-  const formattedDate = `${dayName}  ||  ${day} ${monthShort} ${year}`;
+  const formattedDateFull = `${dayName}  ||  ${day} ${monthShort} ${year}`;
+  const formattedDateShort = `${dayNameShort} ${day} ${monthShort} ${year}`;
 
   return (
     <div 
-      className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-3 backdrop-blur-md p-2 rounded-lg text-white shadow-lg text-sm font-sans select-none border border-white/10"
-      style={{ minWidth: '150px' }}
+      className="absolute top-2 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-3 backdrop-blur-md px-3 py-1.5 sm:p-2 rounded-lg text-white shadow-lg text-xs sm:text-sm font-sans select-none border border-white/10"
     >
-      <span className="whitespace-pre">{formattedDate}</span>
+      <span className="whitespace-pre hidden sm:inline">{formattedDateFull}</span>
+      <span className="whitespace-pre sm:hidden">{formattedDateShort}</span>
     </div>
   );
 };

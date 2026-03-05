@@ -59,17 +59,17 @@ const Home: React.FC = () => {
       {/* Date Display Component */}
       <DateDisplay />
 
-      <div className="flex flex-col items-start p-8 space-y-4">
-        <div onDoubleClick={() => handleOpen('aboutMe')}>
+      <div className="grid grid-cols-4 sm:grid-cols-1 gap-1 sm:gap-4 p-4 pt-12 sm:p-8 sm:pt-8 sm:flex sm:flex-col sm:items-start">
+        <div onDoubleClick={() => handleOpen('aboutMe')} onTouchEnd={() => handleOpen('aboutMe')}>
           <DesktopIcon icon={User} name="About Me" color="#60A5FA" />
         </div>
-        <div onDoubleClick={() => handleOpen('resume')}>
+        <div onDoubleClick={() => handleOpen('resume')} onTouchEnd={() => handleOpen('resume')}>
           <DesktopIcon icon={FileText} name="My Resume" color="#A78BFA" />
         </div>
-        <div onDoubleClick={() => handleOpen('projects')}>
+        <div onDoubleClick={() => handleOpen('projects')} onTouchEnd={() => handleOpen('projects')}>
           <DesktopIcon icon={Folder} name="My Projects" color="#FBBF24" />
         </div>
-        <div onDoubleClick={() => handleOpen('contact')}>
+        <div onDoubleClick={() => handleOpen('contact')} onTouchEnd={() => handleOpen('contact')}>
           <DesktopIcon icon={Mail} name="Contact Me" color="#F87171" />
         </div>
       </div>

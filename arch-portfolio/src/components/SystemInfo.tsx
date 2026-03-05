@@ -92,7 +92,7 @@ const SystemInfo: React.FC = () => {
   };
 
   return (
-    <div className="absolute top-4 right-4 flex items-center gap-3 backdrop-blur-md p-2 rounded-lg text-white shadow-lg text-sm font-sans">
+    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3 backdrop-blur-md px-2 py-1.5 sm:p-2 rounded-lg text-white shadow-lg text-xs sm:text-sm font-sans border border-white/10">
       <span>{formattedTime}</span>
       {renderBatteryInfo()}
     </div>
