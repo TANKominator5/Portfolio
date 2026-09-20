@@ -69,6 +69,7 @@ export default function Home() {
           const Content = app.content;
           return (
             <Window key={key} id={`window-${key}`} title={app.name} onClose={() => closeApp(key)} onMinimize={() => minimizeApp(key)}
+              icon={app.icon} accentColor={app.color}
               onFocus={() => bringToFront(key)} active={activeKey === key} minimized={minimized} zIndex={index + 1}
               defaultWidth={app.width} defaultHeight={app.height} unpadded={key === 'resume'}>
               <Content />

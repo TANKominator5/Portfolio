@@ -2,11 +2,14 @@
 
 import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
+import { AppWindow, type LucideIcon } from 'lucide-react';
 import { fitWindow, resizeWindow, type ResizeDirection, type WindowGeometry } from './windowGeometry';
 
 interface WindowProps {
   id: string;
   title: string;
+  icon?: LucideIcon;
+  accentColor?: string;
   onClose: () => void;
   onMinimize?: () => void;
   onFocus?: () => void;
@@ -34,7 +37,7 @@ const handleStyles: Record<ResizeDirection, React.CSSProperties> = {
 };
 
 const Window: React.FC<WindowProps> = ({
-  id, title, onClose, onMinimize, onFocus, active = false, minimized = false, zIndex = 1,
+  id, title, icon = AppWindow, accentColor = '#93c5fd', onClose, onMinimize, onFocus, active = false, minimized = false, zIndex = 1,
   defaultWidth = 600, defaultHeight = 400, minWidth = 320, minHeight = 220,
   unpadded = false, children,
 }) => {
@@ -150,8 +153,9 @@ const Window: React.FC<WindowProps> = ({
         aria-labelledby={titleId}
         tabIndex={-1}
         hidden={minimized}
-        className="absolute top-0 left-0 pointer-events-auto bg-gray-900/95 backdrop-blur-lg rounded-lg border border-gray-700 shadow-2xl flex-col"
-        style={{ display: minimized ? 'none' : 'flex', width: fullscreen ? '100%' : geometry.w, height: fullscreen ? '100%' : geometry.h, zIndex }}
+        data-active={active}
+        className="desktop-window absolute top-0 left-0 pointer-events-auto flex-col"
+        style={{ '--window-accent': accentColor, display: minimized ? 'none' : 'flex', width: fullscreen ? '100%' : geometry.w, height: fullscreen ? '100%' : geometry.h, zIndex } as React.CSSProperties}
         onPointerDownCapture={() => { if (!active) onFocus?.(); }}
         onFocusCapture={() => { if (!active) onFocus?.(); }}
         onKeyDown={(event) => {
@@ -161,9 +165,9 @@ const Window: React.FC<WindowProps> = ({
           }
         }}
       >
-        <TitleBar title={title} titleId={titleId} onClose={onClose} onMinimize={onMinimize}
+        <TitleBar title={title} titleId={titleId} icon={icon} onClose={onClose} onMinimize={onMinimize}
           onMaximize={isMobile ? undefined : () => setMaximized((previous) => !previous)} maximized={maximized} />
-        <div tabIndex={0} aria-label={`${title} content`} className={`min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'overflow-auto p-3 sm:p-4'}`}>
+        <div tabIndex={0} aria-label={`${title} content`} className={`window-body custom-scroll min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'overflow-auto p-5 sm:p-6'}`}>
           {children}
         </div>
         {!fullscreen && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
@@ -179,28 +183,51 @@ const Window: React.FC<WindowProps> = ({
 interface TitleBarProps {
   title: string;
   titleId: string;
+  icon: LucideIcon;
   onClose: () => void;
   onMinimize?: () => void;
   onMaximize?: () => void;
   maximized: boolean;
 }
 
-const TitleBar: React.FC<TitleBarProps> = ({ title, titleId, onClose, onMinimize, onMaximize, maximized }) => (
-  <div className={`window-title-bar relative h-10 bg-gray-800/80 rounded-t-lg flex items-center gap-2 px-2 shrink-0 select-none border-b border-white/5 ${onMaximize ? 'cursor-move' : ''}`}
+const controlPaths = {
+  close: 'M4.5 4.5 9.5 9.5M9.5 4.5 4.5 9.5',
+  minimize: 'M4 7H10',
+  maximize: 'M4.5 4.5H9.5V9.5H4.5Z',
+  restore: 'M5.5 4H10V8.5M4 5.5H8.5V10H4Z',
+};
+
+function ControlIcon({ action }: { action: keyof typeof controlPaths }) {
+  return (
+    // Draw the circle and mark together, centered at (7, 7), without nested SVG scaling.
+    <svg className={`window-control-dot window-control-${action === 'restore' ? 'maximize' : action}`}
+      width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+      <circle cx="7" cy="7" r="6.5" fill="currentColor" stroke="rgb(0 0 0 / 12%)" strokeWidth="0.5" />
+      <path className="window-control-icon" d={controlPaths[action]} fill="none"
+        stroke="rgb(0 0 0 / 72%)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const TitleBar: React.FC<TitleBarProps> = ({ title, titleId, icon: Icon, onClose, onMinimize, onMaximize, maximized }) => (
+  <div className={`window-title-bar relative shrink-0 select-none ${onMaximize ? 'cursor-move' : ''}`}
     onDoubleClick={onMaximize}>
-    <div className="window-controls flex items-center shrink-0" onDoubleClick={(event) => event.stopPropagation()}>
-      <button type="button" onClick={onClose} className="w-7 h-7 grid place-items-center rounded group" aria-label="Close window">
-        <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F57] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">×</span>
+    <div className="window-controls flex items-center justify-self-start" onDoubleClick={(event) => event.stopPropagation()}>
+      <button type="button" onClick={onClose} className="window-control" aria-label="Close window" title="Close">
+        <ControlIcon action="close" />
       </button>
-      {onMinimize && <button type="button" onClick={onMinimize} className="w-7 h-7 grid place-items-center rounded group" aria-label="Minimize window">
-        <span className="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">−</span>
+      {onMinimize && <button type="button" onClick={onMinimize} className="window-control" aria-label="Minimize window" title="Minimize">
+        <ControlIcon action="minimize" />
       </button>}
-      {onMaximize && <button type="button" onClick={onMaximize} className="w-7 h-7 grid place-items-center rounded group" aria-label={maximized ? 'Restore window' : 'Maximize window'}>
-        <span className="w-3.5 h-3.5 rounded-full bg-[#28C840] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">{maximized ? '⊖' : '⊕'}</span>
+      {onMaximize && <button type="button" onClick={onMaximize} className="window-control" aria-label={maximized ? 'Restore window' : 'Maximize window'} title={maximized ? 'Restore' : 'Maximize'}>
+        <ControlIcon action={maximized ? 'restore' : 'maximize'} />
       </button>}
     </div>
-    <h2 id={titleId} className="min-w-0 flex-1 text-white/80 text-xs font-medium tracking-wide truncate text-center">{title}</h2>
-    <div aria-hidden="true" className="w-7 sm:w-20 shrink-0" />
+    <div className="window-heading min-w-0 flex items-center justify-center gap-2 pointer-events-none">
+      <Icon className="window-app-icon shrink-0" size={14} strokeWidth={1.7} aria-hidden="true" />
+      <h2 id={titleId} className="truncate text-xs font-medium tracking-wide">{title}</h2>
+    </div>
+    <span aria-hidden="true" className="window-title-detail justify-self-end">Portfolio</span>
   </div>
 );
 
