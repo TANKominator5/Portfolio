@@ -20,23 +20,28 @@ const SystemInfo: React.FC = () => {
   useEffect(() => {
     setTime(new Date());
     const timer = setInterval(() => setTime(new Date()), 1000);
+    let disposed = false;
+    let removeBatteryListener: (() => void) | undefined;
 
     const getBatteryStatus = async () => {
       try {
-        if (!('getBattery' in navigator)) {
+        if (typeof navigator.getBattery !== 'function') {
           setBattery({ level: null, status: 'unavailable' });
           return;
         }
 
-        const result = await (navigator as any).getBattery();
+        const result = await navigator.getBattery();
+        if (disposed) return;
 
         // Validate that we got a real BatteryManager (has a numeric `level` property)
         // Some environments return a Response or other unexpected object
         if (
           !result ||
           typeof result !== 'object' ||
-          typeof result.level !== 'number' ||
-          result instanceof Response
+          !Number.isFinite(result.level) ||
+          result.level < 0 || result.level > 1 ||
+          typeof result.addEventListener !== 'function' ||
+          typeof result.removeEventListener !== 'function'
         ) {
           setBattery({ level: null, status: 'unavailable' });
           return;
@@ -46,19 +51,24 @@ const SystemInfo: React.FC = () => {
         setBattery({ level: percentage, status: 'available' });
 
         const handleLevelChange = () => {
-          if (typeof result.level === 'number') {
+          if (Number.isFinite(result.level) && result.level >= 0 && result.level <= 1) {
             setBattery({ level: Math.round(result.level * 100), status: 'available' });
+          } else {
+            setBattery({ level: null, status: 'unavailable' });
           }
         };
         result.addEventListener('levelchange', handleLevelChange);
+        removeBatteryListener = () => result.removeEventListener('levelchange', handleLevelChange);
       } catch {
-        setBattery({ level: null, status: 'unavailable' });
+        if (!disposed) setBattery({ level: null, status: 'unavailable' });
       }
     };
 
     getBatteryStatus();
 
     return () => {
+      disposed = true;
+      removeBatteryListener?.();
       clearInterval(timer);
     };
   }, []);
@@ -86,7 +96,7 @@ const SystemInfo: React.FC = () => {
     return (
       <>
         <span className="text-gray-500">|</span>
-        <span>🔋 {batteryText}</span>
+        <span aria-label={battery.status === 'available' ? `Battery: ${batteryText}` : 'Battery information unavailable'}>🔋 {batteryText}</span>
       </>
     );
   };

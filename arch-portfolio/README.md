@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Debajit Pal — Desktop Portfolio
 
-## Getting Started
+An Arch Linux-inspired portfolio built with Next.js 15, React 19, TypeScript, and Tailwind CSS 4. It includes draggable, resizable windows for About Me, the résumé, projects, and contact details.
 
-First, run the development server:
+## Development
+
+Use Node.js 22.18+ and pnpm 10.26.2. From the repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm --dir arch-portfolio install --frozen-lockfile
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the local URL printed by Next.js (normally http://localhost:3000). Root scripts forward to the application in `arch-portfolio`; dependencies and the application lockfile live there.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Checks and production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+From the repository root:
 
-## Learn More
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm --dir arch-portfolio exec playwright install chromium
+pnpm test:e2e
+pnpm build
+pnpm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+Browser tests start a development server on port 3100. Stop other development servers before running browser tests or a production build, because Next.js 15 uses the same `.next` output directory for both. `next/font` downloads Inter during the first build, so the build requires access to Google Fonts.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Interaction
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Click/tap an icon, or focus it and press Enter/Space, to open an app.
+- Drag a title bar or resize an edge/corner on desktop.
+- Use the title bar controls to close, minimize, or maximize. Double-clicking the title bar also toggles maximization.
+- Restore minimized apps from the taskbar; size, position, and scroll position are preserved.
+- Press Escape while focused inside a window to close it.
+- On narrow screens, windows fill the available area between the top bar and taskbar.
 
-## Deploy on Vercel
+## Source map
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app/page.tsx`: desktop and window ordering/state
+- `src/components/Window.tsx`: window interactions and focus handling
+- `src/components/windowGeometry.ts`: bounded drag/resize calculations
+- `src/components/PortfolioContent.tsx`: shared profile/project content, About Me, and contact links
+- `src/components/ResumeContent.tsx`: résumé layout, education, skills, and awards
+- `src/app/globals.css`: Tailwind v4 theme, wallpaper, and accessibility styles
+- `tests/`: geometry and browser regression tests
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Project-specific repository/live-site URLs were not supplied in the original content. Projects link to the supplied GitHub profile rather than dead placeholder links.
+
+The `pnpm.overrides` entries keep PostCSS and Next.js's optional Sharp dependency on patched releases while retaining Next.js 15.

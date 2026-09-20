@@ -9,5 +9,5 @@ interface BatteryManager extends EventTarget {
 
 // Augment the existing Navigator interface to include getBattery
 interface Navigator {
-  getBattery(): Promise<BatteryManager>;
+  getBattery?: () => Promise<BatteryManager>;
 }

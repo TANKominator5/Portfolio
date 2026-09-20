@@ -1,323 +1,206 @@
-// src/components/Window.tsx
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-
-/* ───────────────────────── types ───────────────────────── */
+import { fitWindow, resizeWindow, type ResizeDirection, type WindowGeometry } from './windowGeometry';
 
 interface WindowProps {
+  id: string;
   title: string;
   onClose: () => void;
   onMinimize?: () => void;
   onFocus?: () => void;
+  active?: boolean;
+  minimized?: boolean;
   zIndex?: number;
   defaultWidth?: number;
   defaultHeight?: number;
   minWidth?: number;
   minHeight?: number;
+  unpadded?: boolean;
   children: React.ReactNode;
 }
 
-type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
-
-/* cursor for each resize direction */
-const CURSOR_MAP: Record<ResizeDirection, string> = {
-  n: 'ns-resize',
-  s: 'ns-resize',
-  e: 'ew-resize',
-  w: 'ew-resize',
-  ne: 'nesw-resize',
-  sw: 'nesw-resize',
-  nw: 'nwse-resize',
-  se: 'nwse-resize',
-};
-
-/* handle thickness in px */
 const HANDLE = 6;
-
-/* ───────────────────── resize handle positions ───────────────────── */
-
 const handleStyles: Record<ResizeDirection, React.CSSProperties> = {
-  n: { top: -HANDLE / 2, left: HANDLE, right: HANDLE, height: HANDLE, cursor: CURSOR_MAP.n },
-  s: { bottom: -HANDLE / 2, left: HANDLE, right: HANDLE, height: HANDLE, cursor: CURSOR_MAP.s },
-  e: { top: HANDLE, right: -HANDLE / 2, bottom: HANDLE, width: HANDLE, cursor: CURSOR_MAP.e },
-  w: { top: HANDLE, left: -HANDLE / 2, bottom: HANDLE, width: HANDLE, cursor: CURSOR_MAP.w },
-  nw: { top: -HANDLE / 2, left: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: CURSOR_MAP.nw },
-  ne: { top: -HANDLE / 2, right: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: CURSOR_MAP.ne },
-  sw: { bottom: -HANDLE / 2, left: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: CURSOR_MAP.sw },
-  se: { bottom: -HANDLE / 2, right: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: CURSOR_MAP.se },
+  n: { top: -HANDLE / 2, left: HANDLE, right: HANDLE, height: HANDLE, cursor: 'ns-resize' },
+  s: { bottom: -HANDLE / 2, left: HANDLE, right: HANDLE, height: HANDLE, cursor: 'ns-resize' },
+  e: { top: HANDLE, right: -HANDLE / 2, bottom: HANDLE, width: HANDLE, cursor: 'ew-resize' },
+  w: { top: HANDLE, left: -HANDLE / 2, bottom: HANDLE, width: HANDLE, cursor: 'ew-resize' },
+  nw: { top: -HANDLE / 2, left: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: 'nwse-resize' },
+  ne: { top: -HANDLE / 2, right: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: 'nesw-resize' },
+  sw: { bottom: -HANDLE / 2, left: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: 'nesw-resize' },
+  se: { bottom: -HANDLE / 2, right: -HANDLE / 2, width: HANDLE * 2, height: HANDLE * 2, cursor: 'nwse-resize' },
 };
-
-/* ───────────────────────── component ───────────────────────── */
 
 const Window: React.FC<WindowProps> = ({
-  title,
-  onClose,
-  onMinimize,
-  onFocus,
-  zIndex = 40,
-  defaultWidth = 600,
-  defaultHeight = 400,
-  minWidth = 320,
-  minHeight = 220,
-  children,
+  id, title, onClose, onMinimize, onFocus, active = false, minimized = false, zIndex = 1,
+  defaultWidth = 600, defaultHeight = 400, minWidth = 320, minHeight = 220,
+  unpadded = false, children,
 }) => {
+  const titleId = useId();
+  const nodeRef = useRef<HTMLDivElement>(null!);
   const [isMobile, setIsMobile] = useState(false);
   const [maximized, setMaximized] = useState(false);
-
-  /* size state (only used when not maximized) */
-  const [size, setSize] = useState({ w: defaultWidth, h: defaultHeight });
-
-  /* Draggable position — we control it so we can reset on maximize */
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  /* remember pre-maximized position + size for restore */
-  const preMax = useRef({ x: 0, y: 0, w: defaultWidth, h: defaultHeight });
-
-  /* ref for listening to pointermove/pointerup on window during resize */
+  const [geometry, setGeometry] = useState<WindowGeometry>({ x: 0, y: 0, w: defaultWidth, h: defaultHeight });
+  const bounds = useRef({ w: defaultWidth, h: defaultHeight });
   const resizing = useRef<{
-    dir: ResizeDirection;
+    direction: ResizeDirection;
+    pointerId: number;
     startX: number;
     startY: number;
-    startW: number;
-    startH: number;
-    startPosX: number;
-    startPosY: number;
+    geometry: WindowGeometry;
+    cursor: string;
+    userSelect: string;
   } | null>(null);
 
-  const nodeRef = useRef<HTMLDivElement>(null!);
-
-  /* ── mobile detection ── */
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+  const stopResize = useCallback(() => {
+    const resize = resizing.current;
+    if (!resize) return;
+    document.body.style.cursor = resize.cursor;
+    document.body.style.userSelect = resize.userSelect;
+    resizing.current = null;
   }, []);
 
-  /* ── center the window on first mount (desktop only) ── */
+  useLayoutEffect(() => {
+    const workspace = nodeRef.current.parentElement;
+    if (!workspace) return;
+    let initial = true;
+    const measure = () => {
+      stopResize();
+      bounds.current = { w: workspace.clientWidth, h: workspace.clientHeight };
+      setIsMobile(window.innerWidth < 640);
+      const center = initial;
+      initial = false;
+      setGeometry((previous) => fitWindow(center ? {
+        ...previous,
+        x: (bounds.current.w - previous.w) / 2,
+        y: (bounds.current.h - previous.h) / 2,
+      } : previous, bounds.current, minWidth, minHeight));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(workspace);
+    return () => observer.disconnect();
+  }, [minWidth, minHeight, stopResize]);
+
   useEffect(() => {
-    if (!isMobile) {
-      const x = Math.max(0, Math.round((window.innerWidth - defaultWidth) / 2));
-      const y = Math.max(0, Math.round((window.innerHeight - defaultHeight) / 2));
-      setPosition({ x, y });
+    if (active && !minimized && !nodeRef.current.contains(document.activeElement)) {
+      nodeRef.current.focus({ preventScroll: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
-
-  /* ── resize handlers ── */
-  const onResizeStart = useCallback(
-    (dir: ResizeDirection, e: React.PointerEvent) => {
-      if (maximized) return;
-      e.preventDefault();
-      e.stopPropagation();
-      onFocus?.();
-
-      resizing.current = {
-        dir,
-        startX: e.clientX,
-        startY: e.clientY,
-        startW: size.w,
-        startH: size.h,
-        startPosX: position.x,
-        startPosY: position.y,
-      };
-
-      /* override cursor globally while resizing */
-      document.body.style.cursor = CURSOR_MAP[dir];
-      document.body.style.userSelect = 'none';
-    },
-    [maximized, size, position, onFocus],
-  );
+  }, [active, minimized]);
 
   useEffect(() => {
-    const onPointerMove = (e: PointerEvent) => {
-      const r = resizing.current;
-      if (!r) return;
-      const dx = e.clientX - r.startX;
-      const dy = e.clientY - r.startY;
+    if (minimized || maximized || isMobile) stopResize();
+  }, [minimized, maximized, isMobile, stopResize]);
 
-      let newW = r.startW;
-      let newH = r.startH;
-      let newX = r.startPosX;
-      let newY = r.startPosY;
-
-      /* east */
-      if (r.dir.includes('e')) newW = Math.max(minWidth, r.startW + dx);
-      /* west */
-      if (r.dir.includes('w')) {
-        const deltaW = Math.min(dx, r.startW - minWidth);
-        newW = r.startW - deltaW;
-        newX = r.startPosX + deltaW;
-      }
-      /* south */
-      if (r.dir.includes('s')) newH = Math.max(minHeight, r.startH + dy);
-      /* north */
-      if (r.dir === 'n' || r.dir === 'ne' || r.dir === 'nw') {
-        const deltaH = Math.min(dy, r.startH - minHeight);
-        newH = r.startH - deltaH;
-        newY = r.startPosY + deltaH;
-      }
-
-      setSize({ w: newW, h: newH });
-      setPosition({ x: newX, y: newY });
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      const resize = resizing.current;
+      if (!resize || event.pointerId !== resize.pointerId) return;
+      setGeometry(resizeWindow(resize.geometry, resize.direction,
+        event.clientX - resize.startX, event.clientY - resize.startY,
+        bounds.current, minWidth, minHeight));
     };
-
-    const onPointerUp = () => {
-      if (resizing.current) {
-        resizing.current = null;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-      }
+    const end = (event: PointerEvent) => {
+      if (event.pointerId === resizing.current?.pointerId) stopResize();
     };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    window.addEventListener('blur', stopResize);
     return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
+      stopResize();
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      window.removeEventListener('blur', stopResize);
     };
-  }, [minWidth, minHeight]);
+  }, [minWidth, minHeight, stopResize]);
 
-  /* ── maximize / restore ── */
-  const toggleMaximize = () => {
-    if (maximized) {
-      /* restore */
-      setSize({ w: preMax.current.w, h: preMax.current.h });
-      setPosition({ x: preMax.current.x, y: preMax.current.y });
-      setMaximized(false);
-    } else {
-      /* save current state, then maximize */
-      preMax.current = { x: position.x, y: position.y, w: size.w, h: size.h };
-      setPosition({ x: 8, y: 8 });
-      setSize({ w: window.innerWidth - 16, h: window.innerHeight - 16 });
-      setMaximized(true);
-    }
+  const startResize = (direction: ResizeDirection, event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || resizing.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onFocus?.();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizing.current = {
+      direction, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+      geometry, cursor: document.body.style.cursor, userSelect: document.body.style.userSelect,
+    };
+    document.body.style.cursor = handleStyles[direction].cursor ?? '';
+    document.body.style.userSelect = 'none';
   };
 
-  /* ══════════════════════ render ══════════════════════ */
-
-  /* ── mobile: near-fullscreen, no drag / resize ── */
-  if (isMobile) {
-    return (
-      <div
-        className="absolute inset-3 top-10 bg-gray-900/90 backdrop-blur-lg shadow-2xl rounded-lg border border-gray-700 flex flex-col"
-        style={{ zIndex }}
-        onPointerDown={() => onFocus?.()}
-      >
-        <TitleBar
-          title={title}
-          onClose={onClose}
-          onMinimize={onMinimize}
-          onMaximize={toggleMaximize}
-          maximized={maximized}
-        />
-        <div className="p-3 text-white text-sm overflow-auto flex-grow">{children}</div>
-      </div>
-    );
-  }
-
-  /* ── desktop: always wrapped in Draggable for stable tree ── */
+  const fullscreen = maximized || isMobile;
   return (
     <Draggable
       handle=".window-title-bar"
-      cancel=".window-controls"
-      position={maximized ? { x: 0, y: 0 } : position}
-      onDrag={(_e, data) => { if (!maximized) setPosition({ x: data.x, y: data.y }); }}
-      disabled={maximized}
-      nodeRef={nodeRef as React.RefObject<HTMLElement>}
+      cancel=".window-controls, .window-resize-handle"
+      position={fullscreen ? { x: 0, y: 0 } : { x: geometry.x, y: geometry.y }}
+      bounds="parent"
+      onDrag={(_event, data) => setGeometry((previous) => fitWindow({ ...previous, x: data.x, y: data.y }, bounds.current, minWidth, minHeight))}
+      disabled={fullscreen || minimized}
+      nodeRef={nodeRef}
     >
       <div
+        id={id}
         ref={nodeRef}
-        className="absolute bg-gray-900/90 backdrop-blur-lg rounded-lg border border-gray-700 flex flex-col"
-        style={{
-          width: maximized ? 'calc(100vw - 16px)' : size.w,
-          height: maximized ? 'calc(100vh - 16px)' : size.h,
-          top: maximized ? 8 : 0,
-          left: maximized ? 8 : 0,
-          zIndex,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)',
-          transition: maximized ? 'width .2s ease, height .2s ease, top .2s ease, left .2s ease' : undefined,
+        role="dialog"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        hidden={minimized}
+        className="absolute top-0 left-0 pointer-events-auto bg-gray-900/95 backdrop-blur-lg rounded-lg border border-gray-700 shadow-2xl flex-col"
+        style={{ display: minimized ? 'none' : 'flex', width: fullscreen ? '100%' : geometry.w, height: fullscreen ? '100%' : geometry.h, zIndex }}
+        onPointerDownCapture={() => { if (!active) onFocus?.(); }}
+        onFocusCapture={() => { if (!active) onFocus?.(); }}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && !event.defaultPrevented) {
+            event.stopPropagation();
+            onClose();
+          }
         }}
-        onPointerDown={() => onFocus?.()}
       >
-        <TitleBar
-          title={title}
-          onClose={onClose}
-          onMinimize={onMinimize}
-          onMaximize={toggleMaximize}
-          maximized={maximized}
-        />
-
-        {/* content */}
-        <div className="p-4 text-white text-sm sm:text-base overflow-auto flex-grow">
+        <TitleBar title={title} titleId={titleId} onClose={onClose} onMinimize={onMinimize}
+          onMaximize={isMobile ? undefined : () => setMaximized((previous) => !previous)} maximized={maximized} />
+        <div tabIndex={0} aria-label={`${title} content`} className={`min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'overflow-auto p-3 sm:p-4'}`}>
           {children}
         </div>
-
-        {/* resize handles (hidden when maximized) */}
-        {!maximized &&
-          (Object.keys(handleStyles) as ResizeDirection[]).map((dir) => (
-            <div
-              key={dir}
-              style={{ position: 'absolute', zIndex: 1, ...handleStyles[dir] }}
-              onPointerDown={(e) => onResizeStart(dir, e)}
-            />
-          ))}
+        {!fullscreen && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
+          <div key={direction} aria-hidden="true" className="window-resize-handle touch-none"
+            style={{ position: 'absolute', zIndex: 1, ...handleStyles[direction] }}
+            onPointerDown={(event) => startResize(direction, event)} />
+        ))}
       </div>
     </Draggable>
   );
 };
 
-/* ───────────────── title bar sub-component ───────────────── */
-
 interface TitleBarProps {
   title: string;
+  titleId: string;
   onClose: () => void;
   onMinimize?: () => void;
-  onMaximize: () => void;
+  onMaximize?: () => void;
   maximized: boolean;
 }
 
-const TitleBar: React.FC<TitleBarProps> = ({ title, onClose, onMinimize, onMaximize, maximized }) => (
-  <div
-    className="window-title-bar h-9 bg-gray-800/80 rounded-t-lg flex items-center justify-between px-3 cursor-move shrink-0 select-none border-b border-white/5"
-    onDoubleClick={onMaximize}
-  >
-    {/* traffic-light buttons — .window-controls is excluded from Draggable via cancel prop */}
-    <div className="window-controls flex items-center gap-2">
-      <button
-        onClick={onClose}
-        className="w-3.5 h-3.5 rounded-full bg-[#FF5F57] hover:brightness-110 transition-all shadow-[0_0_6px_rgba(255,95,87,0.4)] group relative cursor-default"
-        aria-label="Close window"
-      >
-        <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-black/0 group-hover:text-black/60 transition-colors">✕</span>
+const TitleBar: React.FC<TitleBarProps> = ({ title, titleId, onClose, onMinimize, onMaximize, maximized }) => (
+  <div className={`window-title-bar relative h-10 bg-gray-800/80 rounded-t-lg flex items-center gap-2 px-2 shrink-0 select-none border-b border-white/5 ${onMaximize ? 'cursor-move' : ''}`}
+    onDoubleClick={onMaximize}>
+    <div className="window-controls flex items-center shrink-0" onDoubleClick={(event) => event.stopPropagation()}>
+      <button type="button" onClick={onClose} className="w-7 h-7 grid place-items-center rounded group" aria-label="Close window">
+        <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F57] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">×</span>
       </button>
-      {onMinimize && (
-        <button
-          onClick={onMinimize}
-          className="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] hover:brightness-110 transition-all shadow-[0_0_6px_rgba(254,188,46,0.4)] group relative cursor-default"
-          aria-label="Minimize window"
-        >
-          <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-black/0 group-hover:text-black/60 transition-colors">−</span>
-        </button>
-      )}
-      <button
-        onClick={onMaximize}
-        className="w-3.5 h-3.5 rounded-full bg-[#28C840] hover:brightness-110 transition-all shadow-[0_0_6px_rgba(40,200,64,0.4)] group relative cursor-default"
-        aria-label={maximized ? 'Restore window' : 'Maximize window'}
-      >
-        <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-black/0 group-hover:text-black/60 transition-colors">{maximized ? '⊖' : '⊕'}</span>
-      </button>
+      {onMinimize && <button type="button" onClick={onMinimize} className="w-7 h-7 grid place-items-center rounded group" aria-label="Minimize window">
+        <span className="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">−</span>
+      </button>}
+      {onMaximize && <button type="button" onClick={onMaximize} className="w-7 h-7 grid place-items-center rounded group" aria-label={maximized ? 'Restore window' : 'Maximize window'}>
+        <span className="w-3.5 h-3.5 rounded-full bg-[#28C840] text-[10px] leading-[14px] text-black/70 group-hover:brightness-125">{maximized ? '⊖' : '⊕'}</span>
+      </button>}
     </div>
-
-    {/* title — centered */}
-    <span className="text-white/70 text-xs font-medium tracking-wide truncate absolute left-1/2 -translate-x-1/2 pointer-events-none">
-      {title}
-    </span>
-
-    {/* spacer to balance flexbox */}
-    <div className="w-16" />
+    <h2 id={titleId} className="min-w-0 flex-1 text-white/80 text-xs font-medium tracking-wide truncate text-center">{title}</h2>
+    <div aria-hidden="true" className="w-7 sm:w-20 shrink-0" />
   </div>
 );
 
