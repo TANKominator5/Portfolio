@@ -1,28 +1,6 @@
 import { Download, GraduationCap, Code, Briefcase, Award, Github, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
-import { profile, ProjectsContent } from './PortfolioContent';
-
-const education = [
-  { title: 'Bachelor of Technology — Computer Science & Engineering', date: 'Ongoing', school: 'RCC Institute of Information Technology, Kolkata, West Bengal' },
-  { title: 'AISSCE (Class XII)', date: '2024', school: 'Hariyana Vidya Mandir' },
-  { title: 'ICSE (Class X)', date: '2022', school: "St. Joan's School" },
-];
-
-const skills = [
-  ['Languages', 'C, Java, Python, HTML5, CSS3, JavaScript, TypeScript, Dart'],
-  ['Libraries & Frameworks', 'ReactJS, Next.js, Node.js, Tailwind CSS'],
-  ['Databases', 'Supabase, MySQL'],
-  ['Tools & Platforms', 'Flutter, Android Studio, VS Code, Git, GitHub, Vercel, Figma, Excalidraw, NumPy, Pandas'],
-];
-
-const awards = [
-  ['1st rank', 'Cypher Senior 2026 (CP event)'],
-  ['3rd place', 'Pragyan CTF hosted by IIT Dharwad'],
-  ['2nd Runner-Up', 'Showdownn Hackathon, NIT Durgapur'],
-  ['1st Runner-Up', 'HackFest 2025, IIT (ISM) Dhanbad'],
-  ['4th Place (Top 9)', 'Cypher 7.0, Competitive Programming Contest by RCCIIT — earned membership as a Subcore Member of RccTechZ (Coding Club of RCCIIT)'],
-  ['Core Team Member', 'FOSS Club, IIIT Kalyani'],
-  ['Game Dev Subcore Member', 'Ignitex Club, RCCIIT'],
-];
+import { ProjectsContent } from './PortfolioContent';
+import { profile, education, skills, awards } from '@/data/portfolio';
 
 const headingClass = 'text-sm font-medium text-[#e6e6e6] flex items-center gap-2 border-b border-[#2d3139] pb-2 uppercase tracking-wide';
 

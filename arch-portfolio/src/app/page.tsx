@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { User, FileText, Folder, Mail } from 'lucide-react';
+import { User, FileText, Folder, Mail, SquareTerminal } from 'lucide-react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
 import DateDisplay from '@/components/DateDisplay';
 import Window from '@/components/Window';
 import Taskbar from '@/components/Taskbar';
 import ResumeContent from '@/components/ResumeContent';
+import TerminalContent from '@/components/TerminalContent';
 import { AboutContent, ContactContent, ProjectsContent } from '@/components/PortfolioContent';
 
 const APPS = {
@@ -15,6 +16,7 @@ const APPS = {
   resume: { name: 'My Resume', icon: FileText, color: '#A78BFA', width: 800, height: 600, content: ResumeContent },
   projects: { name: 'My Projects', icon: Folder, color: '#FBBF24', width: 700, height: 480, content: ProjectsContent },
   contact: { name: 'Contact Me', icon: Mail, color: '#F87171', width: 500, height: 360, content: ContactContent },
+  terminal: { name: 'Terminal', icon: SquareTerminal, color: '#4ADE80', width: 820, height: 560, content: TerminalContent },
 };
 
 type AppKey = keyof typeof APPS;
@@ -33,7 +35,8 @@ export default function Home() {
   const openApp = (key: AppKey) => {
     bringToFront(key);
     // An already-active window still needs keyboard focus when launched again.
-    document.getElementById(`window-${key}`)?.focus({ preventScroll: true });
+    const windowElement = document.getElementById(`window-${key}`);
+    (windowElement?.querySelector<HTMLInputElement>('[data-terminal-input]') ?? windowElement)?.focus({ preventScroll: true });
   };
 
   const closeApp = (key: AppKey) => {
@@ -71,8 +74,8 @@ export default function Home() {
             <Window key={key} id={`window-${key}`} title={app.name} onClose={() => closeApp(key)} onMinimize={() => minimizeApp(key)}
               icon={app.icon} accentColor={app.color}
               onFocus={() => bringToFront(key)} active={activeKey === key} minimized={minimized} zIndex={index + 1}
-              defaultWidth={app.width} defaultHeight={app.height} unpadded={key === 'resume'}>
-              <Content />
+              defaultWidth={app.width} defaultHeight={app.height} unpadded={key === 'resume' || key === 'terminal'}>
+              {key === 'terminal' ? <TerminalContent active={activeKey === key && !minimized} /> : <Content />}
             </Window>
           );
         })}

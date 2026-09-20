@@ -167,7 +167,7 @@ const Window: React.FC<WindowProps> = ({
       >
         <TitleBar title={title} titleId={titleId} icon={icon} onClose={onClose} onMinimize={onMinimize}
           onMaximize={isMobile ? undefined : () => setMaximized((previous) => !previous)} maximized={maximized} />
-        <div tabIndex={0} aria-label={`${title} content`} className={`window-body custom-scroll min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'overflow-auto p-5 sm:p-6'}`}>
+        <div tabIndex={0} aria-label={`${title} content`} className={`window-body min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'custom-scroll overflow-auto p-5 sm:p-6'}`}>
           {children}
         </div>
         {!fullscreen && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
