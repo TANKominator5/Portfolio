@@ -56,7 +56,7 @@ export default function Home() {
       </header>
 
       <nav aria-label="Desktop applications" className="absolute inset-x-0 top-14 bottom-20 overflow-auto">
-        <div className="grid grid-cols-2 gap-2 p-4 sm:flex sm:flex-col sm:gap-4 sm:px-8 sm:items-start">
+        <div className="grid grid-cols-2 justify-items-center gap-4 p-4 sm:flex sm:flex-col sm:px-8 sm:items-start">
           {appKeys.map((key) => <DesktopIcon key={key} id={`desktop-${key}`} {...APPS[key]} onOpen={() => openApp(key)} />)}
         </div>
       </nav>
