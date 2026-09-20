@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { profile } from '@/data/portfolio';
 import { runTerminalCommand, terminalCommands, TERMINAL_BANNER, TERMINAL_PROMPT, type TerminalResult } from './terminalCommands';
+import TerminalEffects from './TerminalEffects';
+import type { TerminalEffect } from './terminalEasterEggs';
 
 interface Entry {
   id: number;
@@ -23,6 +25,7 @@ export default function TerminalContent({ active = true }: { active?: boolean })
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
   const [completions, setCompletions] = useState<string[]>([]);
   const [skipThrough, setSkipThrough] = useState(-1);
+  const [effect, setEffect] = useState<TerminalEffect | null>(null);
   const nextId = useRef(1);
   const draft = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,6 +43,23 @@ export default function TerminalContent({ active = true }: { active?: boolean })
   const finishBoot = useCallback(() => {
     setBooting(false);
     setEntries([WELCOME]);
+  }, []);
+
+  const exitEffect = useCallback(() => setEffect(null), []);
+
+  const rebootTerminal = useCallback(() => {
+    const id = nextId.current++;
+    setEffect(null);
+    setBooting(false);
+    setBootStep(0);
+    setEntries([{ ...WELCOME, id, result: { ...WELCOME.result, text: `Reboot complete. All projects survived.\n\n${WELCOME.result.text}` } }]);
+    setSkipThrough(id);
+    setHistory([]);
+    setHistoryIndex(null);
+    setInput('');
+    setCompletions([]);
+    draft.current = '';
+    stickToBottom.current = true;
   }, []);
 
   useEffect(() => {
@@ -64,11 +84,11 @@ export default function TerminalContent({ active = true }: { active?: boolean })
   }, [bootStep, booting, reducedMotion, finishBoot]);
 
   useEffect(() => {
-    if (active && !booting) {
+    if (active && !booting && !effect) {
       inputRef.current?.focus({ preventScroll: true });
       scrollToPrompt();
     }
-  }, [active, booting, scrollToPrompt]);
+  }, [active, booting, effect, scrollToPrompt]);
 
   useEffect(() => { scrollToPrompt(); }, [entries, completions, scrollToPrompt]);
 
@@ -95,7 +115,7 @@ export default function TerminalContent({ active = true }: { active?: boolean })
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const command = input.trim();
-    if (booting || !command) return;
+    if (booting || effect || !command) return;
     const result = runTerminalCommand(command);
     setHistory((previous) => [...previous.slice(-99), command]);
     setHistoryIndex(null);
@@ -105,6 +125,8 @@ export default function TerminalContent({ active = true }: { active?: boolean })
 
     if (result.action === 'clear') clearScreen();
     else appendEntry(command, result);
+
+    if (result.effect) setEffect(result.effect);
 
     // Keep browser actions in the submit gesture so popup/mail handlers can run.
     if (result.action === 'gui') window.open(window.location.origin, '_blank', 'noopener,noreferrer');
@@ -163,6 +185,7 @@ export default function TerminalContent({ active = true }: { active?: boolean })
 
   return (
     <div className="terminal-app">
+      <div className="terminal-session" inert={effect !== null} aria-hidden={effect ? true : undefined}>
       <div className="terminal-toolbar">
         <span>{profile.name.replaceAll(' ', '')}</span>
         <TerminalClock />
@@ -208,6 +231,8 @@ export default function TerminalContent({ active = true }: { active?: boolean })
         )}
       </div>
       <div className="terminal-footer" aria-hidden="true"><span>↑↓ history · Tab complete</span><span>Ctrl+L clear</span></div>
+      </div>
+      {effect && <TerminalEffects effect={effect} active={active} reducedMotion={reducedMotion} onExit={exitEffect} onReboot={rebootTerminal} />}
     </div>
   );
 }
@@ -236,8 +261,11 @@ function TypedResult({ result, animate, onProgress }: { result: TerminalResult; 
 
   return (
     <div className={`terminal-result ${result.error ? 'terminal-error' : ''}`} data-typing={visible < result.text.length}>
-      <span className="sr-only">{result.text}</span>
-      <pre className="terminal-output" aria-hidden="true">{result.text.slice(0, visible)}{visible < result.text.length && <span className="terminal-cursor" />}</pre>
+      <span className="sr-only">{result.announcement ?? result.text}</span>
+      <div className={result.art ? 'terminal-fetch' : undefined}>
+        {result.art && <pre className="terminal-fetch-logo" role="img" aria-label="DebajitOS ASCII logo">{result.art}</pre>}
+        <pre className={`terminal-output ${result.preformatted ? 'terminal-output-ascii' : ''}`} aria-hidden="true">{result.text.slice(0, visible)}{visible < result.text.length && <span className="terminal-cursor" />}</pre>
+      </div>
       {visible >= result.text.length && result.links && <div className="terminal-links">
         {result.links.map(({ href, label }) => <a key={href} href={href} target={href.startsWith('mailto:') || href.startsWith('tel:') ? undefined : '_blank'} rel="noopener noreferrer">{label}</a>)}
       </div>}

@@ -16,7 +16,7 @@ const APPS = {
   resume: { name: 'My Resume', icon: FileText, color: '#A78BFA', width: 800, height: 600, content: ResumeContent },
   projects: { name: 'My Projects', icon: Folder, color: '#FBBF24', width: 700, height: 480, content: ProjectsContent },
   contact: { name: 'Contact Me', icon: Mail, color: '#F87171', width: 500, height: 360, content: ContactContent },
-  terminal: { name: 'Terminal', icon: SquareTerminal, color: '#4ADE80', width: 820, height: 560, content: TerminalContent },
+  terminal: { name: 'Terminal', icon: SquareTerminal, color: '#000000', width: 820, height: 560, content: TerminalContent },
 };
 
 type AppKey = keyof typeof APPS;
@@ -72,7 +72,7 @@ export default function Home() {
           const Content = app.content;
           return (
             <Window key={key} id={`window-${key}`} title={app.name} onClose={() => closeApp(key)} onMinimize={() => minimizeApp(key)}
-              icon={app.icon} accentColor={app.color}
+              icon={app.icon} accentColor={key === 'terminal' ? '#C084FC' : app.color}
               onFocus={() => bringToFront(key)} active={activeKey === key} minimized={minimized} zIndex={index + 1}
               defaultWidth={app.width} defaultHeight={app.height} unpadded={key === 'resume' || key === 'terminal'}>
               {key === 'terminal' ? <TerminalContent active={activeKey === key && !minimized} /> : <Content />}

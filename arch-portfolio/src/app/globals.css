@@ -185,7 +185,7 @@ body {
   height: 100%;
   min-height: 0;
   background: #101214;
-  color: #8aff80;
+  color: #c084fc;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 13px;
   line-height: 1.7;
@@ -204,13 +204,13 @@ body {
 }
 
 .terminal-toolbar {
-  border-bottom: 1px solid rgb(138 255 128 / 12%);
-  background: #15191b;
-  color: #a8c3a6;
+  border-bottom: 1px solid rgb(192 132 252 / 12%);
+  background: #18151c;
+  color: #b8a6c3;
 }
 
 .terminal-toolbar time {
-  color: #8ba391;
+  color: #a393b5;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -222,13 +222,13 @@ body {
   overflow-x: hidden;
   padding: 20px;
   overscroll-behavior: contain;
-  scrollbar-color: #344737 transparent;
+  scrollbar-color: #48344f transparent;
   scrollbar-width: thin;
   cursor: text;
 }
 
 .terminal-viewport:focus-visible { outline-offset: -4px; }
-.terminal-app ::selection { background: #345938; color: #efffed; }
+.terminal-app ::selection { background: #4b2e63; color: #faf5ff; }
 .terminal-entry { margin-bottom: 20px; }
 .terminal-prompt { color: #73d9f5; flex-shrink: 0; }
 
@@ -251,7 +251,7 @@ body {
   font-size: clamp(6px, 1.7cqi, 12px);
   line-height: 1.18;
   white-space: pre;
-  color: #8aff80;
+  color: #c084fc;
 }
 
 .terminal-output {
@@ -271,9 +271,9 @@ body {
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: #b0ffaa;
+  color: #e9d5ff;
   font: inherit;
-  caret-color: #8aff80;
+  caret-color: #c084fc;
 }
 
 .terminal-input:focus-visible { outline: none; }
@@ -296,13 +296,13 @@ body {
 
 .terminal-links a:hover,
 .terminal-skip:hover { color: #d5f5ff; }
-.terminal-completions { color: #a8c3a6; white-space: pre-wrap; margin-top: 8px; }
+.terminal-completions { color: #b8a6c3; white-space: pre-wrap; margin-top: 8px; }
 .terminal-skip { margin-top: 20px; cursor: pointer; }
 .terminal-boot p { margin-bottom: 8px; }
 
 .terminal-footer {
-  border-top: 1px solid rgb(138 255 128 / 8%);
-  color: #819084;
+  border-top: 1px solid rgb(192 132 252 / 8%);
+  color: #9786a3;
   font-size: 10px;
 }
 

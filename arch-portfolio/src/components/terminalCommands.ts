@@ -1,4 +1,5 @@
 import { awards, education, profile, projects, skills } from '@/data/portfolio';
+import { easterEggCommands, runEasterEggCommand, type TerminalEffect } from './terminalEasterEggs';
 
 export const TERMINAL_PROMPT = 'visitor@portfolio:~$';
 
@@ -18,7 +19,7 @@ export const TERMINAL_BANNER = [
   '╚═╝     ╚═╝  ╚═╝╚══════╝',
 ].join('\n');
 
-export const terminalCommands = [
+const portfolioCommands = [
   ['help', 'Show available commands'],
   ['about', 'About me'],
   ['skills', 'Technical skills'],
@@ -35,19 +36,27 @@ export const terminalCommands = [
   ['awards', 'Awards and achievements'],
 ] as const;
 
+export const terminalCommands = [...portfolioCommands, ['eastereggs', 'Discover the secret-ish commands'], ...easterEggCommands] as const;
+
 export interface TerminalResult {
   text: string;
   banner?: boolean;
   error?: boolean;
+  art?: string;
+  preformatted?: boolean;
+  announcement?: string;
+  effect?: TerminalEffect;
   action?: 'clear' | 'gui' | 'email';
   links?: { label: string; href: string }[];
 }
 
 export function runTerminalCommand(input: string): TerminalResult {
+  const easterEgg = runEasterEggCommand(input);
+  if (easterEgg) return easterEgg;
   const command = input.trim().toLowerCase();
   switch (command) {
     case 'help':
-      return { text: 'Available commands:\n\n' + terminalCommands.map(([name, description]) => `${name.padEnd(15)} ${description}`).join('\n') + '\n\n↑ / ↓  Command history\nTab    Complete a command\nCtrl+L Clear the screen\nCtrl+C Finish output / cancel input' };
+      return { text: 'Available commands:\n\n' + portfolioCommands.map(([name, description]) => `${name.padEnd(15)} ${description}`).join('\n') + '\n\nFeeling curious? Type "eastereggs".\n\n↑ / ↓  Command history\nTab    Complete a command\nCtrl+L Clear the screen\nCtrl+C Finish output / cancel input' };
     case 'welcome':
       return { banner: true, text: 'BTech CSE Student | RCC Institute of Information Technology\n\nWelcome to my interactive Portfolio Terminal!\nType "help" to explore available commands.' };
     case 'about':
