@@ -28,7 +28,28 @@ export function resizeWindow(
   bounds: WorkspaceSize,
   minWidth = 320,
   minHeight = 220,
+  aspectRatio?: number,
 ): WindowGeometry {
+  if (aspectRatio && direction.length === 2) {
+    const growsX = direction.includes('e') ? dx : -dx;
+    const growsY = direction.includes('s') ? dy : -dy;
+    const heightDelta = (growsX * aspectRatio + growsY) / (aspectRatio ** 2 + 1);
+    const right = rect.x + rect.w;
+    const bottom = rect.y + rect.h;
+    const maxWidth = direction.includes('e') ? bounds.w - rect.x : right;
+    const maxHeight = direction.includes('s') ? bounds.h - rect.y : bottom;
+    const largestHeight = Math.min(maxHeight, maxWidth / aspectRatio);
+    const smallestHeight = Math.min(Math.max(minHeight, minWidth / aspectRatio), largestHeight);
+    const h = clamp(rect.h + heightDelta, smallestHeight, largestHeight);
+    const w = h * aspectRatio;
+    return {
+      x: direction.includes('w') ? right - w : rect.x,
+      y: direction.includes('n') ? bottom - h : rect.y,
+      w,
+      h,
+    };
+  }
+
   let { x, y, w, h } = rect;
   const minimumW = Math.min(minWidth, bounds.w);
   const minimumH = Math.min(minHeight, bounds.h);

@@ -31,3 +31,14 @@ test('all resize directions keep the window inside its workspace', () => {
     }
   }
 });
+
+test('corner resizing can preserve the current window aspect ratio', () => {
+  const ratio = 520 / 720;
+  const grown = resizeWindow({ x: 100, y: 100, w: 520, h: 720 }, 'se', 130, 180, { w: 1200, h: 1100 }, 360, 500, ratio);
+  assert.deepEqual(grown, { x: 100, y: 100, w: 650, h: 900 });
+
+  const shrunk = resizeWindow({ x: 100, y: 100, w: 520, h: 720 }, 'nw', 130, 180, { w: 1200, h: 1100 }, 360, 500, ratio);
+  assert.equal(shrunk.x + shrunk.w, 620);
+  assert.equal(shrunk.y + shrunk.h, 820);
+  assert.ok(Math.abs(shrunk.w / shrunk.h - ratio) < Number.EPSILON);
+});

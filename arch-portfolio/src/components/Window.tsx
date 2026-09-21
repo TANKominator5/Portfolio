@@ -21,6 +21,7 @@ interface WindowProps {
   minWidth?: number;
   minHeight?: number;
   maximizedWidth?: number;
+  lockAspectRatio?: boolean;
   unpadded?: boolean;
   children: React.ReactNode;
 }
@@ -40,7 +41,7 @@ const handleStyles: Record<ResizeDirection, React.CSSProperties> = {
 const Window: React.FC<WindowProps> = ({
   id, title, icon = AppWindow, accentColor = '#93c5fd', onClose, onMinimize, onFocus, active = false, minimized = false, zIndex = 1,
   defaultWidth = 600, defaultHeight = 400, minWidth = 320, minHeight = 220,
-  maximizedWidth, unpadded = false, children,
+  maximizedWidth, lockAspectRatio = false, unpadded = false, children,
 }) => {
   const titleId = useId();
   const nodeRef = useRef<HTMLDivElement>(null!);
@@ -54,6 +55,7 @@ const Window: React.FC<WindowProps> = ({
     startX: number;
     startY: number;
     geometry: WindowGeometry;
+    aspectRatio?: number;
     cursor: string;
     userSelect: string;
   } | null>(null);
@@ -104,7 +106,7 @@ const Window: React.FC<WindowProps> = ({
       if (!resize || event.pointerId !== resize.pointerId) return;
       setGeometry(resizeWindow(resize.geometry, resize.direction,
         event.clientX - resize.startX, event.clientY - resize.startY,
-        bounds.current, minWidth, minHeight));
+        bounds.current, minWidth, minHeight, resize.aspectRatio));
     };
     const end = (event: PointerEvent) => {
       if (event.pointerId === resizing.current?.pointerId) stopResize();
@@ -130,7 +132,8 @@ const Window: React.FC<WindowProps> = ({
     event.currentTarget.setPointerCapture(event.pointerId);
     resizing.current = {
       direction, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
-      geometry, cursor: document.body.style.cursor, userSelect: document.body.style.userSelect,
+      geometry, aspectRatio: lockAspectRatio ? geometry.w / geometry.h : undefined,
+      cursor: document.body.style.cursor, userSelect: document.body.style.userSelect,
     };
     document.body.style.cursor = handleStyles[direction].cursor ?? '';
     document.body.style.userSelect = 'none';
@@ -182,7 +185,9 @@ const Window: React.FC<WindowProps> = ({
         <div tabIndex={0} aria-label={`${title} content`} className={`window-body min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'custom-scroll overflow-auto p-5 sm:p-6'}`}>
           {children}
         </div>
-        {!maximized && !isMobile && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
+        {!maximized && !isMobile && (Object.keys(handleStyles) as ResizeDirection[])
+          .filter((direction) => !lockAspectRatio || direction.length === 2)
+          .map((direction) => (
           <div key={direction} aria-hidden="true" className="window-resize-handle touch-none"
             style={{ position: 'absolute', zIndex: 1, ...handleStyles[direction] }}
             onPointerDown={(event) => startResize(direction, event)} />

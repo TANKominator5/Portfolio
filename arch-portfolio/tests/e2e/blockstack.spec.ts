@@ -43,9 +43,25 @@ test('maximizing keeps the game in a centered portrait window', async ({ page })
   const { game } = await openGame(page);
   await game.getByRole('button', { name: 'Maximize window' }).click();
   const box = (await game.boundingBox())!;
-  expect(box.width).toBe(520);
+  expect(box.width).toBe(330);
   expect(Math.abs(box.x + box.width / 2 - 800)).toBeLessThanOrEqual(1);
   await expect(game.getByRole('button', { name: 'Restore window' })).toBeVisible();
+});
+
+test('resizing is corner-only and preserves the window ratio', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  const { game } = await openGame(page);
+  const handles = game.locator('.window-resize-handle');
+  await expect(handles).toHaveCount(4);
+  const before = (await game.boundingBox())!;
+  const corner = (await handles.last().boundingBox())!;
+  await page.mouse.move(corner.x + corner.width / 2, corner.y + corner.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(corner.x - 50, corner.y - 70, { steps: 5 });
+  await page.mouse.up();
+  const after = (await game.boundingBox())!;
+  expect(after.width).toBeLessThan(before.width);
+  expect(Math.abs(after.width / after.height - before.width / before.height)).toBeLessThan(0.001);
 });
 
 test('hold is limited per piece and Escape pauses the game instead of closing its window', async ({ page }) => {

@@ -7,7 +7,7 @@
   min-width: 0;
   overflow: auto;
   gap: 6px;
-  padding: 10px 14px 8px;
+  padding: 10px 6px 8px;
   background: #101214;
   color: #d8b4fe;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -84,7 +84,7 @@
 .instructions { flex-shrink: 0; color: #756a83; font-size: 8px; line-height: 1.5; text-align: center; }
 .status { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a8ba8; font-size: 8px; line-height: 1; text-align: center; }
 
-@container (max-width: 400px) {
+@container (max-width: 300px) {
   .scoreboard { gap: 9px; font-size: 7px; }
   .scoreboard > div { gap: 3px; }
   .scoreboard dd { font-size: 8px; }
