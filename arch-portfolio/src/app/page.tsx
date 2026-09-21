@@ -60,13 +60,13 @@ export default function Home() {
         <div className="sm:flex-1 flex justify-end"><SystemInfo /></div>
       </header>
 
-      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-14 bottom-20 overflow-auto">
+      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-auto sm:top-16">
         <div className="grid grid-cols-2 justify-items-center gap-4 p-4 sm:flex sm:flex-col sm:px-8 sm:items-start">
           {appKeys.map((key) => <DesktopIcon key={key} id={`desktop-${key}`} {...APPS[key]} onOpen={() => openApp(key)} />)}
         </div>
       </nav>
 
-      <div className="absolute inset-x-2 top-14 bottom-20 z-10 isolate pointer-events-none">
+      <div className="absolute inset-x-2 top-24 bottom-2 z-10 isolate pointer-events-none sm:top-16">
         {appKeys.filter((key) => windows.some((app) => app.key === key)).map((key) => {
           const index = windows.findIndex((app) => app.key === key);
           const { minimized } = windows[index];

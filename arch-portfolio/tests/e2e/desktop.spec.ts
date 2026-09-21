@@ -9,9 +9,10 @@ async function openApp(page: Page, name: string) {
 
 async function expectInWorkspace(dialog: Locator, page: Page) {
   const viewport = page.viewportSize()!;
+  const workspaceTop = viewport.width < 640 ? 95 : 63;
   await expect.poll(async () => {
     const box = await dialog.boundingBox();
-    return !!box && box.x >= 7 && box.y >= 55 && box.x + box.width <= viewport.width - 7 && box.y + box.height <= viewport.height - 79;
+    return !!box && box.x >= 7 && box.y >= workspaceTop && box.x + box.width <= viewport.width - 7 && box.y + box.height <= viewport.height - 7;
   }).toBe(true);
 }
 
@@ -38,7 +39,7 @@ test('keyboard launch, focus, minimize, restore, and Escape close', async ({ pag
   await expect(launcher).toBeFocused();
 });
 
-test('drag, resize and résumé scroll survive minimize/restore; maximization reserves desktop bars', async ({ page }) => {
+test('drag, resize and résumé scroll survive minimize/restore; maximization uses the reclaimed bottom space', async ({ page }) => {
   const dialog = await openApp(page, 'My Resume');
   const title = dialog.locator('.window-title-bar');
   const titleBox = (await title.boundingBox())!;
@@ -65,7 +66,10 @@ test('drag, resize and résumé scroll survive minimize/restore; maximization re
   const taskbar = page.getByRole('navigation', { name: 'Open applications' });
   const taskbarBox = (await taskbar.boundingBox())!;
   const maxBox = (await dialog.boundingBox())!;
-  expect(maxBox.y + maxBox.height).toBeLessThan(taskbarBox.y);
+  expect(taskbarBox.x).toBeLessThanOrEqual(17);
+  expect(taskbarBox.y).toBeLessThanOrEqual(17);
+  expect(taskbarBox.y + taskbarBox.height).toBeLessThanOrEqual(maxBox.y);
+  expect(maxBox.y + maxBox.height).toBeGreaterThan(page.viewportSize()!.height - 10);
   await dialog.getByRole('button', { name: 'Minimize window' }).click();
   await page.getByRole('button', { name: 'Restore My Resume' }).click();
   await expect(dialog.getByRole('button', { name: 'Restore window' })).toBeVisible();
