@@ -20,6 +20,7 @@ interface WindowProps {
   defaultHeight?: number;
   minWidth?: number;
   minHeight?: number;
+  maximizedWidth?: number;
   unpadded?: boolean;
   children: React.ReactNode;
 }
@@ -39,7 +40,7 @@ const handleStyles: Record<ResizeDirection, React.CSSProperties> = {
 const Window: React.FC<WindowProps> = ({
   id, title, icon = AppWindow, accentColor = '#93c5fd', onClose, onMinimize, onFocus, active = false, minimized = false, zIndex = 1,
   defaultWidth = 600, defaultHeight = 400, minWidth = 320, minHeight = 220,
-  unpadded = false, children,
+  maximizedWidth, unpadded = false, children,
 }) => {
   const titleId = useId();
   const nodeRef = useRef<HTMLDivElement>(null!);
@@ -135,15 +136,20 @@ const Window: React.FC<WindowProps> = ({
     document.body.style.userSelect = 'none';
   };
 
-  const fullscreen = maximized || isMobile;
+  const compactMaximized = maximized && !isMobile && maximizedWidth !== undefined;
+  const fullscreen = isMobile || (maximized && !compactMaximized);
+  const compactWidth = Math.min(maximizedWidth ?? bounds.current.w, bounds.current.w);
+  const position = fullscreen ? { x: 0, y: 0 }
+    : compactMaximized ? { x: (bounds.current.w - compactWidth) / 2, y: 0 }
+      : { x: geometry.x, y: geometry.y };
   return (
     <Draggable
       handle=".window-title-bar"
       cancel=".window-controls, .window-resize-handle"
-      position={fullscreen ? { x: 0, y: 0 } : { x: geometry.x, y: geometry.y }}
+      position={position}
       bounds="parent"
       onDrag={(_event, data) => setGeometry((previous) => fitWindow({ ...previous, x: data.x, y: data.y }, bounds.current, minWidth, minHeight))}
-      disabled={fullscreen || minimized}
+      disabled={maximized || isMobile || minimized}
       nodeRef={nodeRef}
     >
       <div
@@ -155,7 +161,13 @@ const Window: React.FC<WindowProps> = ({
         hidden={minimized}
         data-active={active}
         className="desktop-window absolute top-0 left-0 pointer-events-auto flex-col"
-        style={{ '--window-accent': accentColor, display: minimized ? 'none' : 'flex', width: fullscreen ? '100%' : geometry.w, height: fullscreen ? '100%' : geometry.h, zIndex } as React.CSSProperties}
+        style={{
+          '--window-accent': accentColor,
+          display: minimized ? 'none' : 'flex',
+          width: fullscreen ? '100%' : compactMaximized ? compactWidth : geometry.w,
+          height: maximized || isMobile ? '100%' : geometry.h,
+          zIndex,
+        } as React.CSSProperties}
         onPointerDownCapture={() => { if (!active) onFocus?.(); }}
         onFocusCapture={() => { if (!active) onFocus?.(); }}
         onKeyDown={(event) => {
@@ -170,7 +182,7 @@ const Window: React.FC<WindowProps> = ({
         <div tabIndex={0} aria-label={`${title} content`} className={`window-body min-h-0 min-w-0 flex-1 text-white text-sm sm:text-base ${unpadded ? 'overflow-hidden' : 'custom-scroll overflow-auto p-5 sm:p-6'}`}>
           {children}
         </div>
-        {!fullscreen && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
+        {!maximized && !isMobile && (Object.keys(handleStyles) as ResizeDirection[]).map((direction) => (
           <div key={direction} aria-hidden="true" className="window-resize-handle touch-none"
             style={{ position: 'absolute', zIndex: 1, ...handleStyles[direction] }}
             onPointerDown={(event) => startResize(direction, event)} />

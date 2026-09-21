@@ -18,7 +18,7 @@ const APPS = {
   projects: { name: 'My Projects', icon: Folder, color: '#FBBF24', width: 700, height: 480, content: ProjectsContent },
   contact: { name: 'Contact Me', icon: Mail, color: '#F87171', width: 500, height: 360, content: ContactContent },
   terminal: { name: 'Terminal', icon: SquareTerminal, color: '#000000', width: 820, height: 560, content: TerminalContent },
-  blockstack: { name: 'BlockStack', icon: Blocks, color: '#22D3EE', width: 620, height: 720, content: BlockStack },
+  blockstack: { name: 'BlockStack', icon: Blocks, color: '#22D3EE', width: 520, height: 720, content: BlockStack },
 };
 
 type AppKey = keyof typeof APPS;
@@ -77,6 +77,7 @@ export default function Home() {
               icon={app.icon} accentColor={key === 'terminal' ? '#C084FC' : app.color}
               onFocus={() => bringToFront(key)} active={activeKey === key} minimized={minimized} zIndex={index + 1}
               defaultWidth={app.width} defaultHeight={app.height} minWidth={key === 'blockstack' ? 360 : undefined} minHeight={key === 'blockstack' ? 500 : undefined}
+              maximizedWidth={key === 'blockstack' ? app.width : undefined}
               unpadded={key === 'resume' || key === 'terminal' || key === 'blockstack'}>
               {key === 'terminal' ? <TerminalContent active={activeKey === key && !minimized} />
                 : key === 'blockstack' ? <BlockStack active={activeKey === key && !minimized} /> : <Content />}

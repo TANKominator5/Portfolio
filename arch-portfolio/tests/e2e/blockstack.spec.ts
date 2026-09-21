@@ -38,6 +38,16 @@ test('keyboard launch, movement, rotation, hard drop, and gravity work', async (
   await expect.poll(async () => Number(await board.getAttribute('data-y'))).toBeGreaterThan(0);
 });
 
+test('maximizing keeps the game in a centered portrait window', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  const { game } = await openGame(page);
+  await game.getByRole('button', { name: 'Maximize window' }).click();
+  const box = (await game.boundingBox())!;
+  expect(box.width).toBe(520);
+  expect(Math.abs(box.x + box.width / 2 - 800)).toBeLessThanOrEqual(1);
+  await expect(game.getByRole('button', { name: 'Restore window' })).toBeVisible();
+});
+
 test('hold is limited per piece and Escape pauses the game instead of closing its window', async ({ page }) => {
   const { game, board, state } = await openGame(page);
   await game.getByRole('button', { name: 'Start', exact: true }).click();
