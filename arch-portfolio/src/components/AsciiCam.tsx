@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import styles from './AsciiCam.module.css';
 
 const RAMPS = {
@@ -21,6 +22,8 @@ function cameraError(error: unknown) {
 }
 
 export default function AsciiCam({ visible = true }: { visible?: boolean }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsId = useId();
   const [phase, setPhase] = useState<Phase>('idle');
   const [message, setMessage] = useState('Camera off · click Start camera to connect.');
   const [style, setStyle] = useState<Style>('classic');
@@ -179,39 +182,48 @@ export default function AsciiCam({ visible = true }: { visible?: boolean }) {
 
   return (
     <section className={styles.app} aria-label="ASCII camera" data-state={phase}>
-      <div className={styles.toolbar}>
-        <span><b>guest@ascii-cam</b>:~$ stream --ascii</span>
-        <button type="button" onClick={phase === 'idle' ? start : () => stop()}>
+      <div className={styles.workspace}>
+        <aside className={styles.sidebar} data-open={settingsOpen} aria-label="Camera settings">
+          <button type="button" className={styles.sidebarToggle} aria-label={settingsOpen ? 'Hide settings' : 'Show settings'}
+            title={settingsOpen ? 'Hide settings' : 'Show settings'} aria-expanded={settingsOpen} aria-controls={settingsId}
+            onClick={() => setSettingsOpen((open) => !open)}>
+            {settingsOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+            {settingsOpen && <span>Settings</span>}
+          </button>
+          <div id={settingsId} className={styles.settings} hidden={!settingsOpen}>
+            <label>Style<select value={style} onChange={(event) => setStyle(event.target.value as Style)}>
+              <option value="classic">Classic ASCII</option><option value="dots">Only dots</option>
+              <option value="binary">Binary</option><option value="blocks">Blocks</option><option value="custom">Custom characters</option>
+            </select></label>
+            {style === 'custom' && <label>Characters<input type="text" value={characters} maxLength={32} placeholder=" .:-=+*#%@" onChange={(event) => setCharacters(event.target.value)} title="Use one character, or a sequence from light to dense. Empty input uses @." /></label>}
+            <label>Color<select value={color} onChange={(event) => setColor(event.target.value)}>
+              <option value="mint">Mint</option><option value="amber">Amber</option><option value="white">White</option>
+              <option value="purple">Purple</option><option value="camera">Camera colors</option><option value="custom">Custom color</option>
+            </select></label>
+            {color === 'custom' && <label>Tint<input type="color" value={customColor} onChange={(event) => setCustomColor(event.target.value)} /></label>}
+            <label>Detail<select value={detail} onChange={(event) => setDetail(Number(event.target.value))}>
+              <option value={60}>Coarse</option><option value={100}>Balanced</option><option value={160}>Fine</option>
+            </select></label>
+            <label className={styles.toggle}><input type="checkbox" checked={mirror} onChange={(event) => setMirror(event.target.checked)} />Mirror</label>
+            <label className={styles.toggle}><input type="checkbox" checked={invert} onChange={(event) => setInvert(event.target.checked)} />Invert</label>
+          </div>
+        </aside>
+        <div ref={viewportRef} className={styles.viewport}>
+          <video ref={videoRef} muted playsInline hidden aria-hidden="true" />
+          <canvas ref={canvasRef} role="img" aria-label="Live webcam rendered as ASCII characters" hidden={phase !== 'live'} />
+          {phase !== 'live' && <div className={styles.placeholder}>
+            <pre aria-hidden="true">{'+------------------+\n|   . : + # @ # +   |\n|   [ ASCII-CAM ]  |\n|   + # @ # + : .   |\n+------------------+'}</pre>
+            <p>{phase === 'requesting' ? 'Allow camera access in your browser to begin.' : 'Your webcam. A few thousand characters.'}</p>
+            <p className={styles.note}>Start camera requests permission. Video stays in this browser.</p>
+          </div>}
+        </div>
+      </div>
+      <footer className={styles.footer}>
+        <p className={styles.status} role="status">{message}</p>
+        <button type="button" className={styles.cameraButton} onClick={phase === 'idle' ? start : () => stop()}>
           {phase === 'idle' ? 'Start camera' : phase === 'requesting' ? 'Cancel' : 'Stop camera'}
         </button>
-      </div>
-      <div className={styles.settings} aria-label="Camera appearance">
-        <label>Style<select value={style} onChange={(event) => setStyle(event.target.value as Style)}>
-          <option value="classic">Classic ASCII</option><option value="dots">Only dots</option>
-          <option value="binary">Binary</option><option value="blocks">Blocks</option><option value="custom">Custom characters</option>
-        </select></label>
-        {style === 'custom' && <label>Characters<input type="text" value={characters} maxLength={32} placeholder=" .:-=+*#%@" onChange={(event) => setCharacters(event.target.value)} title="Use one character, or a sequence from light to dense. Empty input uses @." /></label>}
-        <label>Color<select value={color} onChange={(event) => setColor(event.target.value)}>
-          <option value="mint">Mint</option><option value="amber">Amber</option><option value="white">White</option>
-          <option value="purple">Purple</option><option value="camera">Camera colors</option><option value="custom">Custom color</option>
-        </select></label>
-        {color === 'custom' && <label>Tint<input type="color" value={customColor} onChange={(event) => setCustomColor(event.target.value)} /></label>}
-        <label>Detail<select value={detail} onChange={(event) => setDetail(Number(event.target.value))}>
-          <option value={60}>Coarse</option><option value={100}>Balanced</option><option value={160}>Fine</option>
-        </select></label>
-        <label className={styles.toggle}><input type="checkbox" checked={mirror} onChange={(event) => setMirror(event.target.checked)} />Mirror</label>
-        <label className={styles.toggle}><input type="checkbox" checked={invert} onChange={(event) => setInvert(event.target.checked)} />Invert</label>
-      </div>
-      <div ref={viewportRef} className={styles.viewport}>
-        <video ref={videoRef} muted playsInline hidden aria-hidden="true" />
-        <canvas ref={canvasRef} role="img" aria-label="Live webcam rendered as ASCII characters" hidden={phase !== 'live'} />
-        {phase !== 'live' && <div className={styles.placeholder}>
-          <pre aria-hidden="true">{'+------------------+\n|   . : + # @ # +   |\n|   [ ASCII-CAM ]  |\n|   + # @ # + : .   |\n+------------------+'}</pre>
-          <p>{phase === 'requesting' ? 'Allow camera access in your browser to begin.' : 'Your webcam. A few thousand characters.'}</p>
-          <p className={styles.note}>Start camera requests permission. Video stays in this browser.</p>
-        </div>}
-      </div>
-      <p className={styles.status} role="status">{message}</p>
+      </footer>
     </section>
   );
 }

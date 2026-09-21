@@ -60,6 +60,7 @@ test('camera starts only on request and renders real frames as configurable char
     return pixels.some((value, index) => index % 4 === 1 && value > 60);
   })).toBe(true);
 
+  await app.getByRole('button', { name: 'Show settings', exact: true }).click();
   await app.getByRole('combobox', { name: 'Style', exact: true }).selectOption('dots');
   await page.evaluate(() => { window.drawnCharacters = []; });
   await expect.poll(() => page.evaluate(() => window.drawnCharacters)).toEqual(['.']);
@@ -149,9 +150,17 @@ test('camera preview and appearance settings fit a narrow screen and resize', as
   await expect(app.getByRole('status')).toContainText('LIVE', { timeout: 15000 });
   await expect.poll(async () => Number(await canvas.getAttribute('data-frame'))).toBeGreaterThan(2);
   await expect(canvas).toBeInViewport({ ratio: 1 });
+  await app.getByRole('button', { name: 'Show settings', exact: true }).click();
   await app.getByRole('combobox', { name: 'Style', exact: true }).selectOption('custom');
   await app.getByLabel('Characters', { exact: true }).fill('.');
   await app.getByRole('combobox', { name: 'Color', exact: true }).selectOption('custom');
+  await app.getByRole('button', { name: 'Hide settings', exact: true }).click();
+  await expect(app.getByRole('combobox', { name: 'Style', exact: true })).toBeHidden();
+  await expect(app.getByRole('button', { name: 'Show settings', exact: true })).toHaveAttribute('aria-expanded', 'false');
+  await app.getByRole('button', { name: 'Show settings', exact: true }).click();
+  await expect(app.getByLabel('Characters', { exact: true })).toHaveValue('.');
+  expect(await page.evaluate(() => window.cameraRequests)).toBe(1);
+  await app.getByRole('button', { name: 'Hide settings', exact: true }).click();
   expect(await app.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
   await page.setViewportSize({ width: 1200, height: 800 });
   await app.getByRole('button', { name: 'Maximize window' }).click();
