@@ -20,6 +20,29 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
+test('all desktop icons fit on screen without scrolling at desktop and mobile sizes', async ({ page }) => {
+  const desktop = page.getByRole('navigation', { name: 'Desktop applications', exact: true });
+  const icons = desktop.getByRole('button');
+  await expect(icons).toHaveCount(6);
+  for (const viewport of [
+    { width: 1366, height: 715 },
+    { width: 1280, height: 600 },
+    { width: 1920, height: 1080 },
+    { width: 320, height: 568 },
+    { width: 568, height: 320 },
+    { width: 320, height: 320 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const icon of await icons.all()) await expect(icon).toBeInViewport({ ratio: 1 });
+    expect(await desktop.evaluate((element) => (
+      element.scrollHeight <= element.clientHeight && element.scrollWidth <= element.clientWidth
+    ))).toBe(true);
+    expect(await page.locator('body').evaluate((element) => (
+      element.scrollWidth <= window.innerWidth && element.scrollHeight <= window.innerHeight
+    ))).toBe(true);
+  }
+});
+
 test('keyboard launch, focus, minimize, restore, and Escape close', async ({ page }) => {
   const launcher = page.getByRole('button', { name: 'Open About Me', exact: true });
   await launcher.focus();

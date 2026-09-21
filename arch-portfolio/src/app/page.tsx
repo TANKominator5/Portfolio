@@ -60,8 +60,8 @@ export default function Home() {
         <div className="sm:flex-1 flex justify-end"><SystemInfo /></div>
       </header>
 
-      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-auto sm:top-16">
-        <div className="grid grid-cols-2 justify-items-center gap-4 p-4 sm:flex sm:flex-col sm:px-8 sm:items-start">
+      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-hidden sm:top-16">
+        <div className="grid h-full grid-flow-col auto-cols-[80px] grid-rows-[repeat(auto-fill,80px)] content-start justify-start gap-4 p-4 sm:auto-cols-[96px] sm:grid-rows-[repeat(auto-fill,96px)] sm:px-8">
           {appKeys.map((key) => <DesktopIcon key={key} id={`desktop-${key}`} {...APPS[key]} onOpen={() => openApp(key)} />)}
         </div>
       </nav>
