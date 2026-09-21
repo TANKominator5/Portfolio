@@ -32,9 +32,9 @@
 .app button:active:not(:disabled) { background: #392449; }
 .app button:disabled { opacity: 0.3; cursor: default; }
 
-.scoreboard { display: flex; justify-content: center; gap: 18px; flex-shrink: 0; color: #81758f; font-size: 8px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
+.scoreboard { display: flex; justify-content: center; gap: 18px; flex-shrink: 0; color: #9a8ba8; font-size: 8px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
 .scoreboard > div { display: flex; align-items: baseline; gap: 5px; }
-.scoreboard dt { color: #81758f; }
+.scoreboard dt { color: #9a8ba8; }
 .scoreboard dd { color: #b5a3c6; font-size: 10px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .scoreboard > div:first-child dd { color: #67e8f9; }
 
@@ -52,7 +52,7 @@
 
 .side { display: flex; flex-direction: column; align-items: center; gap: 6px; align-self: start; }
 .side h4 { color: #9a8ba8; font-size: 8px; font-weight: 500; letter-spacing: 0.12em; }
-.keyHint { color: #756a83; font-size: 8px; }
+.keyHint { color: #9a8ba8; font-size: 8px; }
 .preview { display: grid; grid-template: repeat(4, 1fr) / repeat(4, 1fr); width: 48px; height: 42px; border: 1px solid #2b2235; border-radius: 3px; background: #131117; font-size: 9px; line-height: 1; }
 .preview span { display: grid; place-items: center; }
 .dimmed { opacity: 0.4; }
@@ -81,7 +81,7 @@
 .overlay button { padding: 7px 10px; color: #101214; background: #c084fc; border-color: #c084fc; font-size: 9px; text-transform: uppercase; }
 .overlay button:hover:not(:disabled) { color: #101214; background: #d8b4fe; }
 
-.instructions { flex-shrink: 0; color: #756a83; font-size: 8px; line-height: 1.5; text-align: center; }
+.instructions { flex-shrink: 0; color: #9a8ba8; font-size: 8px; line-height: 1.5; text-align: center; }
 .status { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a8ba8; font-size: 8px; line-height: 1; text-align: center; }
 
 @container (max-width: 300px) {

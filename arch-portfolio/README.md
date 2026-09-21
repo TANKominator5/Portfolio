@@ -38,7 +38,7 @@ To test an already-running development server, set `PLAYWRIGHT_BASE_URL` to its 
 - Use the title bar controls to close, minimize, or maximize. Double-clicking the title bar also toggles maximization.
 - Restore minimized apps from the taskbar; size, position, and scroll position are preserved.
 - Press Escape while focused inside a window to close it.
-- On narrow screens, windows fill the available area between the top bar and taskbar.
+- On narrow screens, windows fill the workspace below the header and top-left taskbar. Desktop icons wrap into columns without scrolling.
 
 ## Terminal
 
@@ -74,7 +74,7 @@ Open **BlockStack** to play a terminal-styled falling-block game. Fill horizonta
 - Clearing 1/2/3/4 rows scores 100/300/500/800 × the current level. Soft drop earns one point per cell, hard drop two.
 - Every ten cleared rows increases the level and falling speed. Grounded pieces have a 450ms lock delay with at most 15 movement resets.
 - **←/→** move, **↑/X** rotate clockwise, **Z** rotates counterclockwise, **↓** soft drops, **Space** hard drops, and **C/Shift** holds a piece. WASD movement also works.
-- **Enter** starts/continues, **P/Esc** pauses/resumes, and **R** restarts. On-screen buttons support touch; hold a direction or soft-drop button to repeat it.
+- **Enter** starts/continues, **P/Esc** pauses/resumes, and **R** restarts. Gameplay uses a keyboard; the minimal UI includes Start/Resume/Restart actions.
 - Switching apps, minimizing, hiding the browser tab, or leaving the browser window pauses the game. Resume explicitly when ready; the board stays intact.
 - The best score is saved locally when browser storage is available. Closing the app resets the round, while minimizing preserves it.
 
@@ -83,6 +83,7 @@ Open **BlockStack** to play a terminal-styled falling-block game. Fill horizonta
 Open **ASCII-Cam** and click **Start camera**, then grant your browser's camera permission. The terminal-style preview renders the live feed entirely as characters, locally in your browser; no video is uploaded or recorded and no microphone is requested. Webcam access requires HTTPS or localhost.
 
 - Choose Classic ASCII, Only dots, Binary, Blocks, or Custom characters. A single character uses brightness-dependent opacity; a sequence maps light to increasingly dense characters. Blank custom input falls back to `@`.
+- Open the collapsible left sidebar to change appearance settings; collapsing it preserves your selections and gives the preview more room.
 - Choose Mint, Amber, White, Purple, the original Camera colors, or a custom color picker.
 - Mirror, invert brightness, and adjust detail while streaming. Rendering adapts to window size and runs at up to 24 frames per second.
 - Stop camera, close, minimize, or hide the browser tab to release the webcam. Restore and click Start camera to reconnect; switching between visible app windows keeps the stream running.

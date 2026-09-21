@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useClock } from './useClock';
 
 // We create a more descriptive type for our battery's state
 type BatteryStateInfo = {
@@ -10,7 +11,7 @@ type BatteryStateInfo = {
 };
 
 const SystemInfo: React.FC = () => {
-  const [time, setTime] = useState<Date | null>(null);
+  const time = useClock('minute');
   // Initialize the battery state as 'loading'
   const [battery, setBattery] = useState<BatteryStateInfo>({
     level: null,
@@ -18,8 +19,6 @@ const SystemInfo: React.FC = () => {
   });
 
   useEffect(() => {
-    setTime(new Date());
-    const timer = setInterval(() => setTime(new Date()), 1000);
     let disposed = false;
     let removeBatteryListener: (() => void) | undefined;
 
@@ -69,7 +68,6 @@ const SystemInfo: React.FC = () => {
     return () => {
       disposed = true;
       removeBatteryListener?.();
-      clearInterval(timer);
     };
   }, []);
 

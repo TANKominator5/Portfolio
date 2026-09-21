@@ -1,17 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { User, FileText, Folder, Mail, SquareTerminal, Blocks, Camera } from 'lucide-react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
 import DateDisplay from '@/components/DateDisplay';
-import Window from '@/components/Window';
 import Taskbar from '@/components/Taskbar';
-import ResumeContent from '@/components/ResumeContent';
-import TerminalContent from '@/components/TerminalContent';
-import BlockStack from '@/components/BlockStack';
-import AsciiCam from '@/components/AsciiCam';
-import { AboutContent, ContactContent, ProjectsContent } from '@/components/PortfolioContent';
+
+const loading = () => <p role="status" className="p-4 text-xs text-gray-400">Loading app…</p>;
+const Window = dynamic(() => import('@/components/Window'));
+const ResumeContent = dynamic(() => import('@/components/ResumeContent'), { loading });
+const TerminalContent = dynamic(() => import('@/components/TerminalContent'), { loading });
+const BlockStack = dynamic(() => import('@/components/BlockStack'), { loading });
+const AsciiCam = dynamic(() => import('@/components/AsciiCam'), { loading });
+const AboutContent = dynamic(() => import('@/components/PortfolioContent').then((module) => module.AboutContent), { loading });
+const ContactContent = dynamic(() => import('@/components/PortfolioContent').then((module) => module.ContactContent), { loading });
+const ProjectsContent = dynamic(() => import('@/components/PortfolioContent').then((module) => module.ProjectsContent), { loading });
 
 const APPS = {
   aboutMe: { name: 'About Me', icon: User, color: '#60A5FA', width: 600, height: 400, content: AboutContent },
@@ -54,7 +60,8 @@ export default function Home() {
   };
 
   return (
-    <main className="h-dvh min-h-64 bg-desktop-wallpaper bg-cover bg-center text-white overflow-hidden relative isolate">
+    <main className="h-dvh min-h-64 text-white overflow-hidden relative isolate">
+      <Image src="/resumeWallpaper.png" alt="" fill sizes="100vw" priority className="-z-10 object-cover" />
       <h1 className="sr-only">Debajit Pal — Portfolio</h1>
       <header className="absolute top-0 inset-x-0 z-20 flex items-center justify-between gap-2 px-2 py-2 sm:px-4 sm:py-3">
         <div className="hidden sm:block flex-1" />
@@ -62,13 +69,13 @@ export default function Home() {
         <div className="sm:flex-1 flex justify-end"><SystemInfo /></div>
       </header>
 
-      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-hidden sm:top-16">
+      <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-hidden lg:top-16">
         <div className="desktop-icons grid h-full grid-flow-col auto-cols-[80px] grid-rows-[repeat(auto-fill,80px)] content-start justify-start gap-4 p-4 sm:auto-cols-[96px] sm:grid-rows-[repeat(auto-fill,96px)] sm:px-8">
           {appKeys.map((key) => <DesktopIcon key={key} id={`desktop-${key}`} {...APPS[key]} onOpen={() => openApp(key)} />)}
         </div>
       </nav>
 
-      <div className="absolute inset-x-2 top-24 bottom-2 z-10 isolate pointer-events-none sm:top-16">
+      <div className="absolute inset-x-2 top-24 bottom-2 z-10 isolate pointer-events-none lg:top-16">
         {appKeys.filter((key) => windows.some((app) => app.key === key)).map((key) => {
           const index = windows.findIndex((app) => app.key === key);
           const { minimized } = windows[index];

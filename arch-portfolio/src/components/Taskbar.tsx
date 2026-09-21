@@ -22,7 +22,7 @@ const Taskbar = <Key extends string,>({ apps, onAppClick }: TaskbarProps<Key>) =
   return (
     <nav
       aria-label="Open applications"
-      className="absolute left-2 top-14 sm:left-4 sm:top-4 z-20 flex items-center gap-1 bg-gray-900/80 backdrop-blur-md rounded-lg text-white shadow-lg text-xs font-sans select-none border border-white/10"
+      className="absolute left-2 top-14 lg:left-4 lg:top-4 z-20 flex items-center gap-1 bg-gray-900/80 backdrop-blur-md rounded-lg text-white shadow-lg text-xs font-sans select-none border border-white/10"
       style={{ minHeight: '36px', padding: apps.length === 0 ? '3px 8px' : '3px' }}
     >
       {apps.length === 0 ? (

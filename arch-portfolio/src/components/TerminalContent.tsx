@@ -5,6 +5,7 @@ import { profile } from '@/data/portfolio';
 import { runTerminalCommand, terminalCommands, TERMINAL_BANNER, TERMINAL_PROMPT, type TerminalResult } from './terminalCommands';
 import TerminalEffects from './TerminalEffects';
 import type { TerminalEffect } from './terminalEasterEggs';
+import { useClock } from './useClock';
 
 interface Entry {
   id: number;
@@ -188,7 +189,7 @@ export default function TerminalContent({ active = true }: { active?: boolean })
       <div className="terminal-session" inert={effect !== null} aria-hidden={effect ? true : undefined}>
         <div className="terminal-toolbar">
           <span>{profile.name.replaceAll(' ', '')}</span>
-          <TerminalClock />
+          <TerminalClock active={active} />
         </div>
         <div ref={viewportRef} className="terminal-viewport custom-scroll" tabIndex={0} aria-label="Terminal scrollback"
           onScroll={(event) => {
@@ -273,12 +274,7 @@ function TypedResult({ result, animate, onProgress }: { result: TerminalResult; 
   );
 }
 
-function TerminalClock() {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
+function TerminalClock({ active }: { active: boolean }) {
+  const now = useClock('second', active);
   return <time dateTime={now?.toISOString()}>{now ? `${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}` : '\u00a0'}</time>;
 }

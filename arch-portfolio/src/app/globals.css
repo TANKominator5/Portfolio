@@ -9,11 +9,6 @@
   --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 
-/* Define custom background image for Tailwind v4 */
-@utility bg-desktop-wallpaper {
-  background-image: url('/resumeWallpaper.png');
-}
-
 body {
   background: var(--color-background);
   color: var(--color-foreground);
@@ -177,11 +172,17 @@ body {
   .window-title-detail { visibility: hidden; }
 }
 
-/* Keep all desktop launchers visible on short, narrow screens. */
-@media (max-width: 400px) and (max-height: 420px) {
-  .desktop-icons { grid-template-rows: repeat(auto-fill, 56px); gap: 8px; padding: 8px; }
-  .desktop-icons > button { height: 56px; }
+/* Keep all desktop launchers visible on short screens, including browser zoom. */
+@media (max-height: 500px) {
+  .desktop-icons { grid-template-rows: repeat(auto-fill, 56px); grid-auto-columns: 80px; gap: 8px; padding: 8px; }
+  .desktop-icons > button { width: 80px; height: 56px; }
   .desktop-icons svg { width: 28px; height: 28px; }
+  .desktop-icons > button > span { margin-top: 4px; font-size: 11px; }
+}
+
+@media (max-width: 400px) and (max-height: 420px) {
+  .desktop-icons { grid-auto-columns: 64px; }
+  .desktop-icons > button { width: 64px; }
 }
 
 /* Portfolio terminal */

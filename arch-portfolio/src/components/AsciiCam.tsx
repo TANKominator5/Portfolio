@@ -132,12 +132,14 @@ export default function AsciiCam({ visible = true }: { visible?: boolean }) {
     const solid = color === 'mint' ? '#86efac' : color === 'amber' ? '#fbbf24' : color === 'white' ? '#f3f4f6' : color === 'purple' ? '#c084fc' : customColor;
     let animation = 0;
     let previous = -Infinity;
+    let previousMediaTime = -1;
     let frames = 0;
 
     const render = (now: number) => {
       animation = requestAnimationFrame(render);
-      if (now - previous < 1000 / 24 || video.readyState < 2 || !video.videoWidth) return;
+      if (now - previous < 1000 / 24 || video.readyState < 2 || !video.videoWidth || video.currentTime === previousMediaTime) return;
       previous = now;
+      previousMediaTime = video.currentTime;
       const aspect = video.videoWidth / video.videoHeight;
       const width = Math.max(1, Math.floor(Math.min(size.width, size.height * aspect)));
       const height = Math.max(1, Math.floor(width / aspect));
@@ -162,6 +164,7 @@ export default function AsciiCam({ visible = true }: { visible?: boolean }) {
       output.font = `${cellWidth / 0.62}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
       output.textAlign = 'center';
       output.textBaseline = 'middle';
+      if (color !== 'camera') output.fillStyle = solid;
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < columns; x++) {
           const index = (y * columns + (mirror ? columns - 1 - x : x)) * 4;
@@ -169,8 +172,9 @@ export default function AsciiCam({ visible = true }: { visible?: boolean }) {
           const light = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
           const brightness = invert ? 1 - light : light;
           const char = ramp[Math.min(ramp.length - 1, Math.floor(brightness * ramp.length))];
-          output.globalAlpha = ramp.length === 1 ? brightness : 1;
-          output.fillStyle = color === 'camera' ? `rgb(${r},${g},${b})` : solid;
+          if (char === ' ') continue;
+          if (ramp.length === 1) output.globalAlpha = brightness;
+          if (color === 'camera') output.fillStyle = `rgb(${r},${g},${b})`;
           output.fillText(char, (x + 0.5) * cellWidth, (y + 0.5) * cellHeight, cellWidth);
         }
       }

@@ -9,7 +9,7 @@ async function openApp(page: Page, name: string) {
 
 async function expectInWorkspace(dialog: Locator, page: Page) {
   const viewport = page.viewportSize()!;
-  const workspaceTop = viewport.width < 640 ? 95 : 63;
+  const workspaceTop = viewport.width < 1024 ? 95 : 63;
   await expect.poll(async () => {
     const box = await dialog.boundingBox();
     return !!box && box.x >= 7 && box.y >= workspaceTop && box.x + box.width <= viewport.width - 7 && box.y + box.height <= viewport.height - 7;
@@ -31,6 +31,9 @@ test('all desktop icons fit on screen without scrolling at desktop and mobile si
     { width: 320, height: 568 },
     { width: 568, height: 320 },
     { width: 320, height: 320 },
+    { width: 320, height: 256 },
+    { width: 640, height: 320 },
+    { width: 800, height: 400 },
   ]) {
     await page.setViewportSize(viewport);
     for (const icon of await icons.all()) await expect(icon).toBeInViewport({ ratio: 1 });
@@ -130,6 +133,34 @@ test('repeated window activation keeps the taskbar clickable and content populat
   await expect(contact.getByRole('link', { name: 'debajitpal.380718@gmail.com' })).toHaveAttribute('href', 'mailto:debajitpal.380718@gmail.com');
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+test('all open-app buttons stay clear of the header at intermediate widths', async ({ page }) => {
+  for (const name of ['About Me', 'My Resume', 'My Projects', 'Contact Me', 'Terminal', 'BlockStack', 'ASCII-Cam']) {
+    const dialog = await openApp(page, name);
+    await dialog.getByRole('button', { name: 'Minimize window' }).click();
+  }
+  for (const width of [320, 640, 800, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    const taskbar = page.getByRole('navigation', { name: 'Open applications' });
+    const dock = (await taskbar.boundingBox())!;
+    for (const element of await page.locator('main > header > *').all()) {
+      const box = await element.boundingBox();
+      if (!box || !await element.innerText()) continue;
+      expect(dock.x + dock.width <= box.x || dock.x >= box.x + box.width || dock.y >= box.y + box.height || dock.y + dock.height <= box.y).toBe(true);
+    }
+    for (const button of await taskbar.getByRole('button').all()) await expect(button).toBeInViewport({ ratio: 1 });
+  }
+});
+
+test('date and minute clock update across midnight without per-second polling', async ({ page }) => {
+  await page.clock.install({ time: new Date(2026, 8, 21, 23, 59, 58) });
+  await page.reload();
+  await expect(page.locator('main > header')).toContainText('21 Sep 2026');
+  await page.clock.fastForward(3000);
+  await expect(page.locator('main > header')).toContainText('22 Sep 2026');
+  const time = await page.evaluate(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  await expect(page.locator('main > header')).toContainText(time);
 });
 
 test('narrow touch screens can read the entire résumé without horizontal overflow', async ({ browser }) => {

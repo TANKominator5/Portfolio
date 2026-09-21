@@ -1,21 +1,11 @@
 // src/components/DateDisplay.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useClock } from './useClock';
 
 const DateDisplay: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState<Date | null>(null);
-
-  useEffect(() => {
-    // Initialize date on mount
-    setCurrentDate(new Date());
-    
-    const timer = setInterval(() => {
-      setCurrentDate(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  const currentDate = useClock('day');
 
   // Return null on server-side or before first client render
   if (!currentDate) return null;
