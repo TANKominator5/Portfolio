@@ -1,0 +1,36 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: auto;
+  background: #101214;
+  color: #c4b5d4;
+  font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color-scheme: dark;
+}
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #302339; }
+.toolbar b { color: #86efac; font-weight: 500; }
+.toolbar button { border: 1px solid #5b8d70; border-radius: 4px; padding: 5px 10px; background: #17281f; color: #bbf7d0; cursor: pointer; }
+.toolbar button:hover { background: #234031; }
+.settings { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; padding: 10px 14px; border-bottom: 1px solid #302339; background: #151219; }
+.settings label { display: flex; flex-direction: column; gap: 3px; color: #ad9cba; font-size: 10px; }
+.settings select, .settings input[type='text'] { min-height: 28px; max-width: 150px; border: 1px solid #48334f; border-radius: 3px; background: #1b1621; color: #e9d5ff; padding: 3px 6px; font: inherit; }
+.settings input[type='color'] { width: 42px; height: 28px; border: 1px solid #48334f; border-radius: 3px; cursor: pointer; }
+.settings .toggle { flex-direction: row; align-items: center; gap: 5px; min-height: 28px; cursor: pointer; }
+.toggle input { accent-color: #86efac; }
+.viewport { display: flex; align-items: center; justify-content: center; flex: 1 1 0; min-height: 140px; min-width: 0; margin: 10px; overflow: hidden; }
+.viewport canvas { flex-shrink: 0; max-width: 100%; max-height: 100%; }
+.placeholder { text-align: center; padding: 8px; }
+.placeholder pre { margin-bottom: 14px; color: #86efac; font: inherit; line-height: 1.3; }
+.placeholder p { margin-top: 6px; }
+.note { color: #8e809f; font-size: 10px; }
+.status { flex-shrink: 0; padding: 8px 14px; border-top: 1px solid #302339; color: #a7bcae; font-size: 10px; overflow-wrap: anywhere; }
+
+@media (max-width: 639px) {
+  .toolbar, .settings { padding: 8px; }
+  .settings { gap: 6px 8px; }
+  .settings select, .settings input[type='text'] { max-width: 130px; }
+  .viewport { margin: 6px; }
+}

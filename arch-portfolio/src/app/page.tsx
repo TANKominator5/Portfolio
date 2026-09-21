@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, FileText, Folder, Mail, SquareTerminal, Blocks } from 'lucide-react';
+import { User, FileText, Folder, Mail, SquareTerminal, Blocks, Camera } from 'lucide-react';
 import DesktopIcon from '@/components/DesktopIcon';
 import SystemInfo from '@/components/SystemInfo';
 import DateDisplay from '@/components/DateDisplay';
@@ -10,6 +10,7 @@ import Taskbar from '@/components/Taskbar';
 import ResumeContent from '@/components/ResumeContent';
 import TerminalContent from '@/components/TerminalContent';
 import BlockStack from '@/components/BlockStack';
+import AsciiCam from '@/components/AsciiCam';
 import { AboutContent, ContactContent, ProjectsContent } from '@/components/PortfolioContent';
 
 const APPS = {
@@ -19,6 +20,7 @@ const APPS = {
   contact: { name: 'Contact Me', icon: Mail, color: '#F87171', width: 500, height: 360, content: ContactContent },
   terminal: { name: 'Terminal', icon: SquareTerminal, color: '#000000', width: 820, height: 560, content: TerminalContent },
   blockstack: { name: 'BlockStack', icon: Blocks, color: '#22D3EE', width: 330, height: 720, content: BlockStack },
+  asciiCam: { name: 'ASCII-Cam', icon: Camera, color: '#86EFAC', width: 820, height: 620, content: AsciiCam },
 };
 
 type AppKey = keyof typeof APPS;
@@ -61,7 +63,7 @@ export default function Home() {
       </header>
 
       <nav aria-label="Desktop applications" className="absolute inset-x-0 top-24 bottom-2 overflow-hidden sm:top-16">
-        <div className="grid h-full grid-flow-col auto-cols-[80px] grid-rows-[repeat(auto-fill,80px)] content-start justify-start gap-4 p-4 sm:auto-cols-[96px] sm:grid-rows-[repeat(auto-fill,96px)] sm:px-8">
+        <div className="desktop-icons grid h-full grid-flow-col auto-cols-[80px] grid-rows-[repeat(auto-fill,80px)] content-start justify-start gap-4 p-4 sm:auto-cols-[96px] sm:grid-rows-[repeat(auto-fill,96px)] sm:px-8">
           {appKeys.map((key) => <DesktopIcon key={key} id={`desktop-${key}`} {...APPS[key]} onOpen={() => openApp(key)} />)}
         </div>
       </nav>
@@ -79,9 +81,10 @@ export default function Home() {
               defaultWidth={app.width} defaultHeight={app.height} minWidth={key === 'blockstack' ? 320 : undefined} minHeight={key === 'blockstack' ? 500 : undefined}
               maximizedWidth={key === 'blockstack' ? app.width : undefined}
               lockAspectRatio={key === 'blockstack'}
-              unpadded={key === 'resume' || key === 'terminal' || key === 'blockstack'}>
+              unpadded={key === 'resume' || key === 'terminal' || key === 'blockstack' || key === 'asciiCam'}>
               {key === 'terminal' ? <TerminalContent active={activeKey === key && !minimized} />
-                : key === 'blockstack' ? <BlockStack active={activeKey === key && !minimized} /> : <Content />}
+                : key === 'blockstack' ? <BlockStack active={activeKey === key && !minimized} />
+                  : key === 'asciiCam' ? <AsciiCam visible={!minimized} /> : <Content />}
             </Window>
           );
         })}

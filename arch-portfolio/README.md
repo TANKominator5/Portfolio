@@ -1,6 +1,6 @@
 # Debajit Pal — Desktop Portfolio
 
-An Arch Linux-inspired portfolio built with Next.js 15, React 19, TypeScript, and Tailwind CSS 4. It includes draggable, resizable windows for About Me, the résumé, projects, contact details, an interactive Terminal, and BlockStack.
+An Arch Linux-inspired portfolio built with Next.js 15, React 19, TypeScript, and Tailwind CSS 4. It includes draggable, resizable windows for About Me, the résumé, projects, contact details, an interactive Terminal, BlockStack, and ASCII-Cam.
 
 ## Development
 
@@ -78,6 +78,16 @@ Open **BlockStack** to play a terminal-styled falling-block game. Fill horizonta
 - Switching apps, minimizing, hiding the browser tab, or leaving the browser window pauses the game. Resume explicitly when ready; the board stays intact.
 - The best score is saved locally when browser storage is available. Closing the app resets the round, while minimizing preserves it.
 
+## ASCII-Cam
+
+Open **ASCII-Cam** and click **Start camera**, then grant your browser's camera permission. The terminal-style preview renders the live feed entirely as characters, locally in your browser; no video is uploaded or recorded and no microphone is requested. Webcam access requires HTTPS or localhost.
+
+- Choose Classic ASCII, Only dots, Binary, Blocks, or Custom characters. A single character uses brightness-dependent opacity; a sequence maps light to increasingly dense characters. Blank custom input falls back to `@`.
+- Choose Mint, Amber, White, Purple, the original Camera colors, or a custom color picker.
+- Mirror, invert brightness, and adjust detail while streaming. Rendering adapts to window size and runs at up to 24 frames per second.
+- Stop camera, close, minimize, or hide the browser tab to release the webcam. Restore and click Start camera to reconnect; switching between visible app windows keeps the stream running.
+- Permission denial, missing/busy devices, and disconnections display a status message with the option to retry.
+
 ## Source map
 
 - `src/app/page.tsx`: desktop and window ordering/state
@@ -92,6 +102,7 @@ Open **BlockStack** to play a terminal-styled falling-block game. Fill horizonta
 - `src/components/TerminalEffects.tsx`: Matrix canvas, simulated reboot, and steam locomotive
 - `src/games/blockstack.ts`: deterministic falling-block rules, collision, rotation, scoring, and piece generation
 - `src/components/BlockStack.tsx` and `BlockStack.module.css`: game UI, input, timers, and window-aware pause behavior
+- `src/components/AsciiCam.tsx` and `AsciiCam.module.css`: webcam lifecycle, character rendering, and appearance controls
 - `src/app/globals.css`: Tailwind v4 theme, wallpaper, and accessibility styles
 - `tests/`: geometry and browser regression tests
 

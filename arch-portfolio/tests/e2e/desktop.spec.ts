@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 test('all desktop icons fit on screen without scrolling at desktop and mobile sizes', async ({ page }) => {
   const desktop = page.getByRole('navigation', { name: 'Desktop applications', exact: true });
   const icons = desktop.getByRole('button');
-  await expect(icons).toHaveCount(6);
+  await expect(icons).toHaveCount(7);
   for (const viewport of [
     { width: 1366, height: 715 },
     { width: 1280, height: 600 },
