@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useReducer, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ChevronsDown, Pause, Play, RotateCcw, RotateCw, ArrowLeftRight } from 'lucide-react';
+import { useEffect, useId, useReducer, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { BOARD_HEIGHT, BOARD_WIDTH, LOCK_DELAY, PIECE_COLORS, createGame, fallInterval, gameReducer, getGhostPiece, getPieceCells, isGrounded, type GameAction, type GameState, type PieceType } from '@/games/blockstack';
 import styles from './BlockStack.module.css';
 
@@ -114,24 +113,14 @@ export default function BlockStack({ active = true }: { active?: boolean }) {
     if (actions[key]) perform(actions[key]);
   };
 
-  const status = game.status === 'ready' ? 'READY // press Enter to start'
-    : game.status === 'gameover' ? 'STACK OVERFLOW // try another run'
+  const status = game.status === 'ready' ? 'READY // press Enter'
+    : game.status === 'gameover' ? 'GAME OVER // press Enter'
       : game.status === 'paused' ? 'PAUSED // your stack is safe'
-        : game.lastClear ? `${game.lastClear === 4 ? 'FOUR-LINE CLEAR' : `${game.lastClear} LINE${game.lastClear > 1 ? 'S' : ''} CLEARED`} // nice stack management`
-          : 'RUNNING // stack, clear, repeat';
+        : game.lastClear ? `${game.lastClear === 4 ? 'TETRIS' : `${game.lastClear} LINE${game.lastClear > 1 ? 'S' : ''}`}`
+          : 'RUNNING';
 
   return (
     <div className={styles.app} data-state={game.status} onKeyDown={onKeyDown}>
-      <header className={styles.header}>
-        <div><h3>BLOCKSTACK<span aria-hidden="true">_</span></h3><p>falling blocks / terminal edition</p></div>
-        <div className={styles.headerActions}>
-          <button type="button" onClick={togglePause} disabled={!playable || game.status === 'ready' || game.status === 'gameover'} aria-label={game.status === 'paused' ? 'Resume game' : 'Pause game'} title="Pause / resume (P)">
-            {game.status === 'paused' ? <Play size={15} /> : <Pause size={15} />}
-          </button>
-          <button type="button" onClick={start} disabled={!playable || game.status === 'ready'} aria-label="Restart game" title="Restart (R)"><RotateCcw size={15} /></button>
-        </div>
-      </header>
-
       <dl className={styles.scoreboard}>
         {[['Score', game.score], ['Lines', game.lines], ['Level', game.level], ['Best', best]].map(([label, value]) => (
           <div key={label}><dt>{label}</dt><dd data-testid={`blockstack-${String(label).toLowerCase()}`}>{String(value).padStart(label === 'Score' || label === 'Best' ? 6 : 2, '0')}</dd></div>
@@ -143,7 +132,6 @@ export default function BlockStack({ active = true }: { active?: boolean }) {
           <h4>HOLD</h4>
           <PiecePreview type={game.held} label={`Held piece: ${game.held ?? 'empty'}`} dimmed={!game.canHold} />
           <span className={styles.keyHint}>[ C ]</span>
-          <div className={styles.sideNote}>10 × 20<br />7-BAG<br /><span>▧ ghost</span></div>
         </aside>
 
         <div ref={boardRef} className={styles.well} role="application" aria-label="BlockStack game board" aria-describedby={instructionsId} tabIndex={0} data-game-focus
@@ -151,13 +139,11 @@ export default function BlockStack({ active = true }: { active?: boolean }) {
           onPointerDown={(event) => { if (!(event.target as HTMLElement).closest('button')) focusBoard(); }}>
           <BoardView game={game} />
           {game.status !== 'playing' && <div className={styles.overlay}>
-            <span className={styles.overlayTag}>{game.status === 'ready' ? 'INSERT COFFEE' : game.status === 'paused' ? 'SESSION SUSPENDED' : 'STACK OVERFLOW'}</span>
-            <h4>{game.status === 'ready' ? 'Ready to stack?' : game.status === 'paused' ? 'Paused' : 'Game over'}</h4>
-            <p>{game.status === 'ready' ? 'Fill a row. Clear some space.' : game.status === 'paused' ? (game.pauseReason === 'away' ? 'Paused while you were away.' : 'Take a breath. The stack can wait.') : `${game.score.toLocaleString()} points. One more run?`}</p>
+            <h4>{game.status === 'ready' ? 'READY' : game.status === 'paused' ? 'PAUSED' : 'GAME OVER'}</h4>
+            <p>{game.status === 'ready' ? 'Press Enter to start' : game.status === 'paused' ? 'your stack is safe' : `${game.score.toLocaleString()} points`}</p>
             <button type="button" disabled={!playable} onClick={game.status === 'paused' ? togglePause : start}>
-              {game.status === 'ready' ? 'Start game' : game.status === 'paused' ? 'Continue game' : 'Play again'}
+              {game.status === 'ready' ? 'Start' : game.status === 'paused' ? 'Resume' : 'Restart'}
             </button>
-            <span className={styles.keyHint}>[ Enter ]</span>
           </div>}
         </div>
 
@@ -167,17 +153,8 @@ export default function BlockStack({ active = true }: { active?: boolean }) {
         </aside>
       </div>
 
-      <p id={instructionsId} className={styles.instructions}>← → move · ↑ / X rotate · Z reverse · ↓ soft drop<br />Space hard drop · C hold · P / Esc pause · R restart</p>
-
-      <div className={styles.controls} aria-label="Game controls">
-        <RepeatControl label="Move left" disabled={!running} onAction={() => perform({ type: 'move', direction: -1 })}><ArrowLeft size={18} /></RepeatControl>
-        <button type="button" aria-label="Rotate clockwise" title="Rotate clockwise" disabled={!running} onClick={() => perform({ type: 'rotate', direction: 1 })}><RotateCw size={18} /></button>
-        <RepeatControl label="Move right" disabled={!running} onAction={() => perform({ type: 'move', direction: 1 })}><ArrowRight size={18} /></RepeatControl>
-        <RepeatControl label="Soft drop" disabled={!running} onAction={() => perform({ type: 'softDrop' })}><ArrowDown size={18} /></RepeatControl>
-        <button type="button" aria-label="Hard drop" title="Hard drop" disabled={!running} onClick={() => perform({ type: 'hardDrop' })}><ChevronsDown size={18} /></button>
-        <button type="button" aria-label="Hold piece" title="Hold piece" disabled={!running || !game.canHold} onClick={() => perform({ type: 'hold' })}><ArrowLeftRight size={18} /></button>
-      </div>
       <p className={styles.status} role="status">{status}</p>
+      <p id={instructionsId} className={styles.instructions}>← → move · ↑ / X rotate · Z reverse · ↓ soft drop<br />Space hard drop · C hold · P / Esc pause · R restart</p>
     </div>
   );
 }
@@ -209,32 +186,4 @@ function PiecePreview({ type, label, dimmed = false }: { type: PieceType | null;
   return <div className={`${styles.preview} ${dimmed ? styles.dimmed : ''}`} role="img" aria-label={label} style={type ? { color: PIECE_COLORS[type] } : undefined}>
     {Array.from({ length: 16 }, (_, index) => <span key={index} aria-hidden="true">{occupied.has(index) ? '[]' : ' '}</span>)}
   </div>;
-}
-
-function RepeatControl({ label, disabled, onAction, children }: { label: string; disabled: boolean; onAction: () => void; children: ReactNode }) {
-  const delay = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const repeat = useRef<ReturnType<typeof setInterval> | null>(null);
-  const actionRef = useRef(onAction);
-  useEffect(() => { actionRef.current = onAction; }, [onAction]);
-  const stop = useCallback(() => {
-    if (delay.current) clearTimeout(delay.current);
-    if (repeat.current) clearInterval(repeat.current);
-    delay.current = null;
-    repeat.current = null;
-  }, []);
-  useEffect(() => {
-    if (disabled) stop();
-    return stop;
-  }, [disabled, stop]);
-  return <button type="button" aria-label={label} title={label} disabled={disabled}
-    onPointerDown={(event) => {
-      if (event.button !== 0 || disabled) return;
-      event.preventDefault();
-      event.currentTarget.setPointerCapture(event.pointerId);
-      stop();
-      onAction();
-      delay.current = setTimeout(() => { repeat.current = setInterval(() => actionRef.current(), 70); }, 180);
-    }}
-    onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
-    onClick={(event) => { if (event.detail === 0) onAction(); }}>{children}</button>;
 }

@@ -6,8 +6,8 @@
   min-height: 0;
   min-width: 0;
   overflow: auto;
-  gap: 10px;
-  padding: 18px 22px 12px;
+  gap: 6px;
+  padding: 10px 14px 8px;
   background: #101214;
   color: #d8b4fe;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -15,13 +15,6 @@
   scrollbar-width: thin;
   scrollbar-color: #48344f transparent;
 }
-
-.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
-.header h3 { color: #e9d5ff; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; }
-.header h3 span { color: #67e8f9; }
-.header p { margin-top: 3px; font-size: 9px; color: #8e809f; }
-.headerActions { display: flex; gap: 6px; }
-.headerActions button { width: 32px; height: 32px; }
 
 .app button {
   display: grid;
@@ -39,35 +32,34 @@
 .app button:active:not(:disabled) { background: #392449; }
 .app button:disabled { opacity: 0.3; cursor: default; }
 
-.scoreboard { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex-shrink: 0; border-block: 1px solid #2b2235; padding-block: 9px; }
-.scoreboard dt { color: #9a8ba8; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; }
-.scoreboard dd { margin-top: 2px; color: #e9d5ff; font-size: 16px; font-variant-numeric: tabular-nums; }
+.scoreboard { display: flex; justify-content: center; gap: 18px; flex-shrink: 0; color: #81758f; font-size: 8px; line-height: 1; text-transform: uppercase; letter-spacing: 0.06em; }
+.scoreboard > div { display: flex; align-items: baseline; gap: 5px; }
+.scoreboard dt { color: #81758f; }
+.scoreboard dd { color: #b5a3c6; font-size: 10px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .scoreboard > div:first-child dd { color: #67e8f9; }
 
 .arena {
   container-type: size;
   display: grid;
-  grid-template-columns: 52px auto 52px;
+  grid-template-columns: 48px auto 48px;
   justify-content: center;
   align-items: center;
-  column-gap: 12px;
+  column-gap: 10px;
   flex: 1 1 0%;
   min-height: 180px;
   min-width: 0;
 }
 
-.side { display: flex; flex-direction: column; align-items: center; gap: 7px; align-self: start; }
-.side h4 { color: #b5a3c6; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; }
-.keyHint { color: #8e809f; font-size: 9px; }
-.sideNote { margin-top: 20px; text-align: center; color: #756a83; font-size: 9px; line-height: 2; }
-.sideNote span { color: #a393b5; }
-.preview { display: grid; grid-template: repeat(4, 1fr) / repeat(4, 1fr); width: 52px; height: 44px; border: 1px solid #2b2235; border-radius: 3px; background: #131117; font-size: 9px; line-height: 1; }
+.side { display: flex; flex-direction: column; align-items: center; gap: 6px; align-self: start; }
+.side h4 { color: #9a8ba8; font-size: 8px; font-weight: 500; letter-spacing: 0.12em; }
+.keyHint { color: #756a83; font-size: 8px; }
+.preview { display: grid; grid-template: repeat(4, 1fr) / repeat(4, 1fr); width: 48px; height: 42px; border: 1px solid #2b2235; border-radius: 3px; background: #131117; font-size: 9px; line-height: 1; }
 .preview span { display: grid; place-items: center; }
 .dimmed { opacity: 0.4; }
 
 .well {
   position: relative;
-  width: min(calc(100cqw - 128px), calc(50cqh - 2px), 280px);
+  width: min(calc(100cqw - 116px), calc(50cqh - 2px), 340px);
   aspect-ratio: 1 / 2;
   border: 1px solid #755396;
   padding: 3px;
@@ -83,36 +75,28 @@
 .filled { color: var(--piece-color); background: color-mix(in srgb, var(--piece-color) 12%, transparent); }
 .ghost { color: #675172; }
 
-.overlay { position: absolute; inset: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 12px; background: rgb(13 14 19 / 94%); }
-.overlayTag { color: #67e8f9; font-size: 8px; letter-spacing: 0.09em; }
-.overlay h4 { color: #f3e8ff; font-size: clamp(12px, 2.8cqw, 20px); font-weight: 600; }
-.overlay p { max-width: 170px; color: #b5a3c6; font-size: 10px; line-height: 1.6; }
-.overlay button { padding: 9px 12px; color: #101214; background: #c084fc; border-color: #c084fc; font-size: 11px; }
+.overlay { position: absolute; inset: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; padding: 10px; background: rgb(13 14 19 / 94%); }
+.overlay h4 { color: #f3e8ff; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+.overlay p { color: #8e809f; font-size: 9px; }
+.overlay button { padding: 7px 10px; color: #101214; background: #c084fc; border-color: #c084fc; font-size: 9px; text-transform: uppercase; }
 .overlay button:hover:not(:disabled) { color: #101214; background: #d8b4fe; }
 
-.instructions { flex-shrink: 0; color: #9a8ba8; font-size: 9px; line-height: 1.7; text-align: center; }
-.controls { flex-shrink: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-.controls button { min-height: 38px; }
-.status { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-top: 1px solid #2b2235; padding-top: 8px; color: #a393b5; font-size: 9px; }
+.instructions { flex-shrink: 0; color: #756a83; font-size: 8px; line-height: 1.5; text-align: center; }
+.status { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a8ba8; font-size: 8px; line-height: 1; text-align: center; }
 
 @container (max-width: 400px) {
-  .header h3 { font-size: 16px; }
-  .header p { font-size: 8px; }
-  .scoreboard dd { font-size: 13px; }
+  .scoreboard { gap: 9px; font-size: 7px; }
+  .scoreboard > div { gap: 3px; }
+  .scoreboard dd { font-size: 8px; }
   .overlay { gap: 7px; padding: 7px; }
-  .overlayTag { display: none; }
   .overlay p { font-size: 8px; }
   .overlay button { padding: 7px 6px; font-size: 9px; white-space: nowrap; }
   .instructions { font-size: 8px; }
 }
 
 @media (max-width: 639px) {
-  .app { padding: 12px 10px 8px; gap: 5px; }
+  .app { padding: 8px 8px 6px; gap: 4px; }
   .arena { min-height: 160px; }
   .preview { height: 36px; }
-  .scoreboard { padding-block: 4px; }
-  .scoreboard dt { font-size: 8px; line-height: 1; }
-  .scoreboard dd { font-size: 12px; line-height: 1.25; }
   .instructions { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .status { padding-top: 5px; }
 }

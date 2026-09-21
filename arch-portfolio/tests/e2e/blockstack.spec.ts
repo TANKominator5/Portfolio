@@ -40,11 +40,10 @@ test('keyboard launch, movement, rotation, hard drop, and gravity work', async (
 
 test('hold is limited per piece and Escape pauses the game instead of closing its window', async ({ page }) => {
   const { game, board, state } = await openGame(page);
-  await game.getByRole('button', { name: 'Start game', exact: true }).click();
+  await game.getByRole('button', { name: 'Start', exact: true }).click();
   const original = await board.getAttribute('data-piece');
   await board.press('c');
   await expect(game.getByRole('img', { name: `Held piece: ${original}` })).toBeVisible();
-  await expect(game.getByRole('button', { name: 'Hold piece' })).toBeDisabled();
   const next = await board.getAttribute('data-piece');
   await board.press('c');
   await expect(board).toHaveAttribute('data-piece', next!);
@@ -59,7 +58,9 @@ test('hold is limited per piece and Escape pauses the game instead of closing it
   await board.press('p');
   await expect(state).toHaveAttribute('data-state', 'playing');
   await board.press('Space');
-  await expect(game.getByRole('button', { name: 'Hold piece' })).toBeEnabled();
+  const holdable = await board.getAttribute('data-piece');
+  await board.press('c');
+  await expect(game.getByRole('img', { name: `Held piece: ${holdable}` })).toBeVisible();
 });
 
 test('minimize, app switching, and browser blur pause safely without losing the stack', async ({ page }) => {
@@ -73,7 +74,7 @@ test('minimize, app switching, and browser blur pause safely without losing the 
   await expect(state).toHaveAttribute('data-state', 'paused');
   await expect(board).toHaveAttribute('data-locked', '1');
   await expect(game.getByTestId('blockstack-score')).toHaveText(score);
-  await game.getByRole('button', { name: 'Continue game', exact: true }).click();
+  await game.getByRole('button', { name: 'Resume', exact: true }).click();
   await page.getByRole('button', { name: 'Open Terminal', exact: true }).click();
   const terminal = page.getByRole('dialog', { name: 'Terminal', exact: true });
   const input = terminal.getByRole('textbox', { name: 'Terminal command' });
@@ -82,11 +83,11 @@ test('minimize, app switching, and browser blur pause safely without losing the 
   await expect(state).toHaveAttribute('data-state', 'paused');
   await expect(board).toHaveAttribute('data-locked', '1');
   await page.getByRole('button', { name: 'Show BlockStack', exact: true }).click();
-  await game.getByRole('button', { name: 'Continue game', exact: true }).click();
+  await game.getByRole('button', { name: 'Resume', exact: true }).click();
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   await expect(state).toHaveAttribute('data-state', 'paused');
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await game.getByRole('button', { name: 'Continue game', exact: true }).click();
+  await game.getByRole('button', { name: 'Resume', exact: true }).click();
   await expect(state).toHaveAttribute('data-state', 'playing');
 });
 
@@ -100,7 +101,7 @@ test('game over can be restarted and the best score survives reopening', async (
   const score = Number(await game.getByTestId('blockstack-score').innerText());
   expect(score).toBeGreaterThan(0);
   await expect.poll(async () => Number(await game.getByTestId('blockstack-best').innerText())).toBeGreaterThanOrEqual(score);
-  await game.getByRole('button', { name: 'Play again', exact: true }).click();
+  await game.getByRole('button', { name: 'Restart', exact: true }).click();
   await expect(state).toHaveAttribute('data-state', 'playing');
   await expect(board).toHaveAttribute('data-locked', '0');
   await expect(game.getByTestId('blockstack-score')).toHaveText('000000');
@@ -110,45 +111,25 @@ test('game over can be restarted and the best score survives reopening', async (
   expect(Number(await game.getByTestId('blockstack-best').innerText())).toBeGreaterThanOrEqual(score);
 });
 
-test('holding a movement button repeats and releasing it stops horizontal movement', async ({ page }) => {
-  const { game, board } = await openGame(page);
-  await board.press('Enter');
-  const button = game.getByRole('button', { name: 'Move left', exact: true });
-  await button.hover();
-  await page.mouse.down();
-  await page.waitForTimeout(400);
-  await page.mouse.up();
-  const x = Number(await board.getAttribute('data-x'));
-  expect(x).toBeLessThan(2);
-  await page.waitForTimeout(200);
-  await expect(board).toHaveAttribute('data-x', String(x));
-  await game.getByRole('button', { name: 'Restart game', exact: true }).click();
-  await expect(board).toHaveAttribute('data-x', '3');
-  await expect(game.getByTestId('blockstack-score')).toHaveText('000000');
-});
-
-test('a narrow touch screen can play, pause, and restore without horizontal overflow', async ({ browser, baseURL }) => {
+test('a narrow screen can play, pause, and restore without horizontal overflow', async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
   const page = await context.newPage();
   const { game, board, state } = await openGame(page);
-  await game.getByRole('button', { name: 'Start game', exact: true }).tap();
-  const hardDrop = game.getByRole('button', { name: 'Hard drop', exact: true });
-  await expect(hardDrop).toBeInViewport();
-  await game.getByRole('button', { name: 'Move left', exact: true }).tap();
+  await board.press('Enter');
+  await board.press('ArrowLeft');
   await expect(board).toHaveAttribute('data-x', '2');
-  await hardDrop.tap();
+  await board.press('Space');
   await expect(board).toHaveAttribute('data-locked', '1');
-  await game.getByRole('button', { name: 'Pause game', exact: true }).tap();
+  await board.press('Escape');
   await expect(state).toHaveAttribute('data-state', 'paused');
   await game.getByRole('button', { name: 'Minimize window' }).tap();
   await page.getByRole('button', { name: 'Restore BlockStack', exact: true }).tap();
   await expect(board).toHaveAttribute('data-locked', '1');
-  await game.getByRole('button', { name: 'Continue game', exact: true }).tap();
+  await game.getByRole('button', { name: 'Resume', exact: true }).tap();
   expect(await game.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
   expect(await page.locator('body').evaluate((element) => element.scrollWidth <= window.innerWidth)).toBe(true);
   await page.setViewportSize({ width: 568, height: 320 });
-  await expect(hardDrop).toBeEnabled();
-  await hardDrop.tap();
+  await board.press('Space');
   await expect(board).toHaveAttribute('data-locked', '2');
   await context.close();
 });
