@@ -1,6 +1,6 @@
 # Debajit Pal — Desktop Portfolio
 
-An Arch Linux-inspired portfolio built with Next.js 15, React 19, TypeScript, and Tailwind CSS 4. It includes draggable, resizable windows for About Me, the résumé, projects, contact details, and an interactive Terminal.
+An Arch Linux-inspired portfolio built with Next.js 15, React 19, TypeScript, and Tailwind CSS 4. It includes draggable, resizable windows for About Me, the résumé, projects, contact details, an interactive Terminal, and BlockStack.
 
 ## Development
 
@@ -66,6 +66,18 @@ Type `eastereggs` to discover:
 
 Effects stay inside the Terminal window. Reduced-motion mode uses a static Matrix scene and omits the panic glitch. The explicitly requested `sl` animation uses a slower, five-second glide in this mode and returns to the prompt when the train finishes crossing. Scrollback supports mouse, touch, and keyboard scrolling and preserves the reading position when minimized.
 
+## BlockStack
+
+Open **BlockStack** to play a terminal-styled falling-block game. Fill horizontal rows to clear them and prevent the stack from reaching the top.
+
+- 10 × 20 board, seven-piece bags, wall/floor rotation kicks, hold, three next-piece previews, and a ghost landing guide.
+- Clearing 1/2/3/4 rows scores 100/300/500/800 × the current level. Soft drop earns one point per cell, hard drop two.
+- Every ten cleared rows increases the level and falling speed. Grounded pieces have a 450ms lock delay with at most 15 movement resets.
+- **←/→** move, **↑/X** rotate clockwise, **Z** rotates counterclockwise, **↓** soft drops, **Space** hard drops, and **C/Shift** holds a piece. WASD movement also works.
+- **Enter** starts/continues, **P/Esc** pauses/resumes, and **R** restarts. On-screen buttons support touch; hold a direction or soft-drop button to repeat it.
+- Switching apps, minimizing, hiding the browser tab, or leaving the browser window pauses the game. Resume explicitly when ready; the board stays intact.
+- The best score is saved locally when browser storage is available. Closing the app resets the round, while minimizing preserves it.
+
 ## Source map
 
 - `src/app/page.tsx`: desktop and window ordering/state
@@ -78,6 +90,8 @@ Effects stay inside the Terminal window. Reduced-motion mode uses a static Matri
 - `src/components/terminalCommands.ts`: command responses and actions
 - `src/components/terminalEasterEggs.ts`: quoted arguments, fortunes, ASCII output, and Easter-egg dispatch
 - `src/components/TerminalEffects.tsx`: Matrix canvas, simulated reboot, and steam locomotive
+- `src/games/blockstack.ts`: deterministic falling-block rules, collision, rotation, scoring, and piece generation
+- `src/components/BlockStack.tsx` and `BlockStack.module.css`: game UI, input, timers, and window-aware pause behavior
 - `src/app/globals.css`: Tailwind v4 theme, wallpaper, and accessibility styles
 - `tests/`: geometry and browser regression tests
 
