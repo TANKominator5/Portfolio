@@ -53,6 +53,19 @@ Open **Terminal** on the desktop to see its startup sequence and welcome banner.
 - Reduced-motion preferences skip the startup and typing animations.
 - Profile, project, résumé, and terminal content share `src/data/portfolio.ts`. Certifications explicitly report that none are listed until real certification data is added.
 
+### Easter eggs
+
+Type `eastereggs` to discover:
+
+- `neofetch` / `fastfetch`: a custom DebajitOS ASCII logo and fictional, coffee-powered system specs.
+- `sudo rm -rf /`: a simulated kernel panic and reboot, returning to a fresh terminal in three seconds. The portfolio stays loaded.
+- `matrix`: green ASCII rain. Exit with Esc, Ctrl+C, or the visible exit button.
+- `cowsay "hire me"`: an ASCII cow with a custom, quoted message. `fortune | cowsay` gives it a random developer quote.
+- `fortune`, `coffee`, `ls`, `pwd`, `uname [-a]`, and `uptime`: more Linux-inspired jokes.
+- `sl`: a tiny steam locomotive passes the prompt, then returns control automatically. Esc/Ctrl+C or the stop button ends it early.
+
+Effects stay inside the Terminal window. Reduced-motion mode uses a static Matrix scene and omits the panic glitch. The explicitly requested `sl` animation uses a slower, five-second glide in this mode and returns to the prompt when the train finishes crossing. Scrollback supports mouse, touch, and keyboard scrolling and preserves the reading position when minimized.
+
 ## Source map
 
 - `src/app/page.tsx`: desktop and window ordering/state
@@ -63,6 +76,8 @@ Open **Terminal** on the desktop to see its startup sequence and welcome banner.
 - `src/components/ResumeContent.tsx`: résumé layout, education, skills, and awards
 - `src/components/TerminalContent.tsx`: terminal session, animations, keyboard input, and history
 - `src/components/terminalCommands.ts`: command responses and actions
+- `src/components/terminalEasterEggs.ts`: quoted arguments, fortunes, ASCII output, and Easter-egg dispatch
+- `src/components/TerminalEffects.tsx`: Matrix canvas, simulated reboot, and steam locomotive
 - `src/app/globals.css`: Tailwind v4 theme, wallpaper, and accessibility styles
 - `tests/`: geometry and browser regression tests
 

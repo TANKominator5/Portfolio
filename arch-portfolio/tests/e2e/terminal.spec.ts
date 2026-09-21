@@ -112,6 +112,27 @@ test('minimizing retains output, input, history, and maximized state', async ({ 
   await expect(input).toHaveValue('projects');
 });
 
+test('long output scrolls with the mouse and preserves manual scrollback across restore', async ({ page }) => {
+  const terminal = await openTerminal(page);
+  await run(terminal, 'projects');
+  const scrollback = terminal.getByLabel('Terminal scrollback', { exact: true });
+  const bottom = await scrollback.evaluate((element) => ({ top: element.scrollTop, height: element.clientHeight, content: element.scrollHeight }));
+  expect(bottom.height).toBeGreaterThan(0);
+  expect(bottom.content).toBeGreaterThan(bottom.height);
+  expect(bottom.top).toBeGreaterThan(0);
+  await scrollback.hover();
+  await page.mouse.wheel(0, -2000);
+  await expect.poll(() => scrollback.evaluate((element) => element.scrollTop)).toBe(0);
+  await page.waitForTimeout(1100);
+  expect(await scrollback.evaluate((element) => element.scrollTop)).toBe(0);
+  await terminal.getByRole('button', { name: 'Minimize window' }).click();
+  await page.getByRole('button', { name: 'Restore Terminal', exact: true }).click();
+  expect(await scrollback.evaluate((element) => element.scrollTop)).toBe(0);
+  await scrollback.hover();
+  await page.mouse.wheel(0, 2000);
+  await expect.poll(() => scrollback.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+});
+
 test('cancel and clear clean up in-flight output without breaking the next command', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const errors: string[] = [];

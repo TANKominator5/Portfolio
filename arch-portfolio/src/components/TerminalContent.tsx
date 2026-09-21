@@ -186,51 +186,51 @@ export default function TerminalContent({ active = true }: { active?: boolean })
   return (
     <div className="terminal-app">
       <div className="terminal-session" inert={effect !== null} aria-hidden={effect ? true : undefined}>
-      <div className="terminal-toolbar">
-        <span>{profile.name.replaceAll(' ', '')}</span>
-        <TerminalClock />
-      </div>
-      <div ref={viewportRef} className="terminal-viewport custom-scroll" tabIndex={0} aria-label="Terminal scrollback"
-        onScroll={(event) => {
-          const viewport = event.currentTarget;
-          if (viewport.clientHeight > 0) stickToBottom.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 48;
-        }}
-        onClick={(event) => {
-          if (!(event.target as HTMLElement).closest('a, button, input') && !window.getSelection()?.toString()) {
-            inputRef.current?.focus({ preventScroll: true });
-          }
-        }}>
-        {booting ? (
-          <div className="terminal-boot">
-            <div role="status" aria-label="Starting terminal">
-              {BOOT_LINES.slice(0, bootStep + 1).map((line) => <p key={line}><span className="terminal-prompt">[ OK ]</span> {line}</p>)}
-              <span className="terminal-cursor" aria-hidden="true" />
+        <div className="terminal-toolbar">
+          <span>{profile.name.replaceAll(' ', '')}</span>
+          <TerminalClock />
+        </div>
+        <div ref={viewportRef} className="terminal-viewport custom-scroll" tabIndex={0} aria-label="Terminal scrollback"
+          onScroll={(event) => {
+            const viewport = event.currentTarget;
+            if (viewport.clientHeight > 0) stickToBottom.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 48;
+          }}
+          onClick={(event) => {
+            if (!(event.target as HTMLElement).closest('a, button, input') && !window.getSelection()?.toString()) {
+              inputRef.current?.focus({ preventScroll: true });
+            }
+          }}>
+          {booting ? (
+            <div className="terminal-boot">
+              <div role="status" aria-label="Starting terminal">
+                {BOOT_LINES.slice(0, bootStep + 1).map((line) => <p key={line}><span className="terminal-prompt">[ OK ]</span> {line}</p>)}
+                <span className="terminal-cursor" aria-hidden="true" />
+              </div>
+              <button type="button" className="terminal-skip" onClick={finishBoot}>Skip startup →</button>
             </div>
-            <button type="button" className="terminal-skip" onClick={finishBoot}>Skip startup →</button>
-          </div>
-        ) : (
-          <>
-            <div role="log" aria-label="Terminal history" aria-live="polite" aria-relevant="additions">
-              {entries.map((entry) => (
-                <div key={entry.id} className="terminal-entry" data-command={entry.command}>
-                  <div className="terminal-command-line"><span className="terminal-prompt">{TERMINAL_PROMPT}</span><span className="terminal-echo">{entry.command}</span></div>
-                  {entry.result.banner && <pre className="terminal-banner" role="img" aria-label={profile.name}>{TERMINAL_BANNER}</pre>}
-                  <TypedResult result={entry.result} animate={!reducedMotion && entry.id > skipThrough} onProgress={scrollToPrompt} />
-                </div>
-              ))}
-            </div>
-            <form className="terminal-command-line terminal-input-line" aria-label="Run a terminal command" onSubmit={submit}>
-              <label htmlFor="terminal-command" className="terminal-prompt"><span aria-hidden="true">{TERMINAL_PROMPT}</span><span className="sr-only">Terminal command</span></label>
-              <input ref={inputRef} id="terminal-command" data-terminal-input value={input} maxLength={256}
-                onChange={(event) => { setInput(event.target.value); setHistoryIndex(null); setCompletions([]); }}
-                onKeyDown={handleKeyDown} className="terminal-input" type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" />
-              <button type="submit" className="sr-only focus:not-sr-only terminal-run">Run command</button>
-            </form>
-            {!!completions.length && <p className="terminal-completions" role="status">{completions.join('  ')}</p>}
-          </>
-        )}
-      </div>
-      <div className="terminal-footer" aria-hidden="true"><span>↑↓ history · Tab complete</span><span>Ctrl+L clear</span></div>
+          ) : (
+            <>
+              <div role="log" aria-label="Terminal history" aria-live="polite" aria-relevant="additions">
+                {entries.map((entry) => (
+                  <div key={entry.id} className="terminal-entry" data-command={entry.command}>
+                    <div className="terminal-command-line"><span className="terminal-prompt">{TERMINAL_PROMPT}</span><span className="terminal-echo">{entry.command}</span></div>
+                    {entry.result.banner && <pre className="terminal-banner" role="img" aria-label={profile.name}>{TERMINAL_BANNER}</pre>}
+                    <TypedResult result={entry.result} animate={!reducedMotion && entry.id > skipThrough} onProgress={scrollToPrompt} />
+                  </div>
+                ))}
+              </div>
+              <form className="terminal-command-line terminal-input-line" aria-label="Run a terminal command" onSubmit={submit}>
+                <label htmlFor="terminal-command" className="terminal-prompt"><span aria-hidden="true">{TERMINAL_PROMPT}</span><span className="sr-only">Terminal command</span></label>
+                <input ref={inputRef} id="terminal-command" data-terminal-input value={input} maxLength={256}
+                  onChange={(event) => { setInput(event.target.value); setHistoryIndex(null); setCompletions([]); }}
+                  onKeyDown={handleKeyDown} className="terminal-input" type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" />
+                <button type="submit" className="sr-only focus:not-sr-only terminal-run">Run command</button>
+              </form>
+              {!!completions.length && <p className="terminal-completions" role="status">{completions.join('  ')}</p>}
+            </>
+          )}
+        </div>
+        <div className="terminal-footer" aria-hidden="true"><span>↑↓ history · Tab complete</span><span>Ctrl+L clear</span></div>
       </div>
       {effect && <TerminalEffects effect={effect} active={active} reducedMotion={reducedMotion} onExit={exitEffect} onReboot={rebootTerminal} />}
     </div>

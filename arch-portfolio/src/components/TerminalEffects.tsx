@@ -40,7 +40,7 @@ export default function TerminalEffects({ effect, active, reducedMotion, onExit,
         <div className="terminal-effect-controls"><span>MATRIX // connected</span><button type="button" onClick={onExit}>Exit Matrix · Esc</button></div>
         <p className="terminal-matrix-caption">{reducedMotion ? 'The Matrix, paused for reduced motion.' : 'Follow the purple rabbit.'}<br />Esc / Ctrl+C to return</p>
       </>}
-      {effect === 'train' && <Train reducedMotion={reducedMotion} onComplete={onExit} />}
+      {effect === 'train' && <Train onComplete={onExit} />}
       {effect !== 'matrix' && <div className="terminal-effect-controls">
         <span>{effect === 'train' ? 'sl ≠ ls // deadline express' : 'DebajitOS // recovery mode'}</span>
         <button type="button" onClick={exit}>{effect === 'train' ? 'Stop train · Esc' : 'Reboot now'}</button>
@@ -159,13 +159,11 @@ const TRAIN = String.raw`      (  )  (   )  ( )
    |______|__|___H__|__|____|
     \_____/  (O)====(O)  (O)`;
 
-function Train({ reducedMotion, onComplete }: { reducedMotion: boolean; onComplete: () => void }) {
-  const duration = reducedMotion ? 1500 : 3600;
-  useEffect(() => {
-    const timer = window.setTimeout(onComplete, duration);
-    return () => window.clearTimeout(timer);
-  }, [duration, onComplete]);
+function Train({ onComplete }: { onComplete: () => void }) {
   return <div className="terminal-train-track">
-    <pre className={`terminal-train ${reducedMotion ? 'terminal-train-parked' : ''}`} style={{ animationDuration: `${duration}ms` }} role="img" aria-label="A tiny ASCII steam locomotive passing the prompt">{TRAIN}</pre>
+    <pre className="terminal-train" role="img" aria-label="A tiny ASCII steam locomotive passing the prompt"
+      onAnimationEnd={(event) => {
+        if (event.animationName === 'terminal-train-trip') onComplete();
+      }}>{TRAIN}</pre>
   </div>;
 }
