@@ -81,7 +81,7 @@
 .overlay button { padding: 7px 10px; color: #101214; background: #c084fc; border-color: #c084fc; font-size: 9px; text-transform: uppercase; }
 .overlay button:hover:not(:disabled) { color: #101214; background: #d8b4fe; }
 
-.instructions { flex-shrink: 0; color: #9a8ba8; font-size: 8px; line-height: 1.5; text-align: center; }
+.instructions { flex-shrink: 0; color: #d8b4fe; font-size: 9px; font-weight: 500; line-height: 1.5; text-align: center; text-shadow: 0 0 8px rgb(216 180 254 / 28%); }
 .status { flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a8ba8; font-size: 8px; line-height: 1; text-align: center; }
 
 @container (max-width: 300px) {
@@ -91,7 +91,7 @@
   .overlay { gap: 7px; padding: 7px; }
   .overlay p { font-size: 8px; }
   .overlay button { padding: 7px 6px; font-size: 9px; white-space: nowrap; }
-  .instructions { font-size: 8px; }
+  .instructions { font-size: 9px; }
 }
 
 @media (max-width: 639px) {
